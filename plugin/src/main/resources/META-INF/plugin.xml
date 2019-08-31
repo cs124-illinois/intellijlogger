@@ -7,7 +7,7 @@
 
     <description><![CDATA[ Enables MP development for CS 125 @ Illinois. ]]></description>
 
-    <idea-version since-build="2019.1" until-build="2019.1.*" />
+    <idea-version since-build="191" until-build="191.*" />
 
     <depends>com.intellij.modules.lang</depends>
 

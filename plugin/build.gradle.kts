@@ -16,8 +16,8 @@ intellij {
     sandboxDirectory = File(projectDir, "sandbox").absolutePath
 }
 tasks.patchPluginXml {
-    sinceBuild(intellijVersion)
-    untilBuild("$intellijVersion.*")
+    sinceBuild("191")
+    untilBuild("191.*")
 }
 dependencies {
     implementation(kotlin("stdlib"))
