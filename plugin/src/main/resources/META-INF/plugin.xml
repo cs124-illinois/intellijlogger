@@ -1,0 +1,37 @@
+<idea-plugin>
+    <id>edu.illinois.cs.cs125.intellijplugin</id>
+    <name>CS 125 @ Illinois</name>
+    <version>2019.9</version>
+
+    <vendor email="challen@illinois.edu" url="https://cs125.cs.illinois.edu">CS 125 @ Illinois</vendor>
+
+    <description><![CDATA[ Enables MP development for CS 125 @ Illinois. ]]></description>
+
+    <idea-version since-build="2019.1" until-build="2019.1.*" />
+
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <typedHandler implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TypedHandler"/>
+        <testStatusListener implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TestStatusHandler"/>
+        <applicationService
+                serviceInterface="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"
+                serviceImplementation="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"/>
+    </extensions>
+
+    <application-components>
+        <component>
+            <implementation-class>edu.illinois.cs.cs125.intellijplugin.CS125Component</implementation-class>
+        </component>
+    </application-components>
+
+    <actions>
+        <action id="CS125.ToolbarRunGroup.Grade"
+                class="edu.illinois.cs.cs125.intellijplugin.CS125GradeAction"
+                description="Initiate CS 125 MP grading"
+                icon="/icons/cs125.png">
+            <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl G"/>
+        </action>
+    </actions>
+</idea-plugin>
