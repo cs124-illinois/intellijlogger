@@ -39,7 +39,7 @@ import java.time.Instant
 import java.util.*
 import kotlin.concurrent.timer
 
-class CS125Component :
+class Component :
         BaseComponent,
         CaretListener,
         VisibleAreaListener,
@@ -78,7 +78,7 @@ class CS125Component :
         val connection = ApplicationManager.getApplication().messageBus.connect()
         connection.subscribe(ProjectManager.TOPIC, this)
 
-        val state = CS125Persistence.getInstance().persistentState
+        val state = Persistence.getInstance().persistentState
         log.trace("Loading " + state.savedCounters.size.toString() + " counters")
 
         if (state.UUID == "") {
@@ -132,7 +132,7 @@ class CS125Component :
             return
         }
 
-        val state = CS125Persistence.getInstance().persistentState
+        val state = Persistence.getInstance().persistentState
         if (state.savedCounters.size == 0) {
             log.trace("No counters to upload")
             return
@@ -232,7 +232,7 @@ class CS125Component :
     fun rotateCounters() {
         log.trace("rotateCounters")
 
-        val state = CS125Persistence.getInstance().persistentState
+        val state = Persistence.getInstance().persistentState
         val end = Instant.now().toEpochMilli()
 
         for ((project, counter) in currentProjectCounters) {
@@ -333,7 +333,7 @@ class CS125Component :
         log.trace(projectConfiguration.toString())
         projectConfigurations[project] = projectConfiguration
 
-        val state = CS125Persistence.getInstance().persistentState
+        val state = Persistence.getInstance().persistentState
 
         val newCounter = Counter(state.UUID,
                 state.counterIndex++,
@@ -363,7 +363,7 @@ class CS125Component :
         log.trace("projectClosing")
 
         val currentCounter = currentProjectCounters[project] ?: return
-        val state = CS125Persistence.getInstance().persistentState
+        val state = Persistence.getInstance().persistentState
 
         // We save this counter regardless of whether it has counts just to mark the end of a session
         currentCounter.end = Instant.now().toEpochMilli()

@@ -6,8 +6,8 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import java.time.Instant
 
-@State(name = "CS125Component", storages = [(Storage(file = "CS125Component.xml"))])
-class CS125Persistence : PersistentStateComponent<CS125Persistence.State> {
+@State(name = "Component", storages = [(Storage(file = "CS125Component.xml"))])
+class Persistence : PersistentStateComponent<Persistence.State> {
     class State {
         var activeCounters = mutableListOf<Counter>()
         var savedCounters = mutableListOf<Counter>()
@@ -24,8 +24,8 @@ class CS125Persistence : PersistentStateComponent<CS125Persistence.State> {
         persistentState = state
     }
     companion object {
-        fun getInstance(): CS125Persistence {
-            return ServiceManager.getService(CS125Persistence::class.java)
+        fun getInstance(): Persistence {
+            return ServiceManager.getService(Persistence::class.java)
         }
     }
 }

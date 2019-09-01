@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.Logger
 
-class CS125GradeAction : AnAction() {
+class GradeAction : AnAction() {
 
     private val log = Logger.getInstance("edu.illinois.cs.cs125")
 
@@ -21,7 +21,7 @@ class CS125GradeAction : AnAction() {
             if (runConfiguration.name.trim().toLowerCase().startsWith("grade")) {
                 ProgramRunnerUtil.executeConfiguration(runConfiguration, DefaultRunExecutor.getRunExecutorInstance())
                 val projectCounter =
-                        project.getComponent(CS125Component::class.java)?.currentProjectCounters?.get(project) ?: return
+                        project.getComponent(Component::class.java)?.currentProjectCounters?.get(project) ?: return
                 projectCounter.gradingCount++
             }
         }
@@ -30,7 +30,7 @@ class CS125GradeAction : AnAction() {
     override fun update(anActionEvent: AnActionEvent) {
         log.trace("update")
         val project = anActionEvent.project
-        val isVisible = project?.getComponent(CS125Component::class.java)?.projectConfigurations?.containsKey(project) ?: false
+        val isVisible = project?.getComponent(Component::class.java)?.projectConfigurations?.containsKey(project) ?: false
         anActionEvent.presentation.isVisible = isVisible
     }
 }

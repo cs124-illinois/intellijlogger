@@ -16,7 +16,7 @@ data class Counters(val counters: List<Counter>) {
 }
 
 @Suppress("unused")
-class Counter(
+data class Counter(
         var UUID: String = "",
         var index: Long = 0,
         var previousIndex: Long = -1,

@@ -12,20 +12,20 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <typedHandler implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TypedHandler"/>
-        <testStatusListener implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TestStatusHandler"/>
-        <applicationService serviceImplementation="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"/>
+        <typedHandler implementation="edu.illinois.cs.cs125.intellijplugin.Component$TypedHandler"/>
+        <testStatusListener implementation="edu.illinois.cs.cs125.intellijplugin.Component$TestStatusHandler"/>
+        <applicationService serviceImplementation="edu.illinois.cs.cs125.intellijplugin.Persistence"/>
     </extensions>
 
     <application-components>
         <component>
-            <implementation-class>edu.illinois.cs.cs125.intellijplugin.CS125Component</implementation-class>
+            <implementation-class>edu.illinois.cs.cs125.intellijplugin.Component</implementation-class>
         </component>
     </application-components>
 
     <actions>
         <action id="CS125.ToolbarRunGroup.Grade"
-                class="edu.illinois.cs.cs125.intellijplugin.CS125GradeAction"
+                class="edu.illinois.cs.cs125.intellijplugin.GradeAction"
                 description="Initiate CS 125 MP grading"
                 icon="/icons/cs125.png">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
