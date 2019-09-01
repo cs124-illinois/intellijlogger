@@ -15,12 +15,12 @@ data class Counters(val counters: List<Counter>) {
     }
 }
 
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 data class Counter(
         var UUID: String = "",
         var index: Long = 0,
         var previousIndex: Long = -1,
-        var MP: String = "",
+        var name: String? = null,
         var email: String? = null,
         var sentIPAddress: String? = null,
         var version: String = "",

@@ -273,9 +273,9 @@ class Component :
                     state.UUID,
                     state.counterIndex++,
                     counter.index,
-                    projectConfigurations[project]?.name ?: "",
-                    projectConfigurations[project]?.email ?: "",
-                    projectConfigurations[project]?.networkAddress ?: "",
+                    projectConfigurations[project]?.name,
+                    projectConfigurations[project]?.email,
+                    projectConfigurations[project]?.networkAddress,
                     version
             )
             currentProjectCounters[project] = newCounter
