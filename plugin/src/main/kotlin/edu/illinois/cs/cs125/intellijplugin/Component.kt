@@ -28,8 +28,13 @@ import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiFile
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
+import org.apache.http.conn.ssl.NoopHostnameVerifier
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.ssl.SSLContextBuilder
 import org.jetbrains.annotations.NotNull
 import org.yaml.snakeyaml.Yaml
 import java.io.File
@@ -64,7 +69,8 @@ class Component :
             val name: String,
             val emailLocation: String?,
             var email: String?,
-            val networkAddress: String?
+            val networkAddress: String?,
+            val trustSelfSignedCertificates: Boolean
     )
 
     var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
@@ -196,20 +202,27 @@ class Component :
                     return
                 }
 
-                val httpClient = HttpClientBuilder.create().build()
+                val httpClient = if (projectConfiguration.trustSelfSignedCertificates) {
+                    HttpClients.custom().setSSLSocketFactory(SSLConnectionSocketFactory(
+                            SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy()).build(),
+                            NoopHostnameVerifier()
+                    )).build()
+                } else {
+                    HttpClientBuilder.create().build()
+                }
                 val counterPost = HttpPost(destination)
                 counterPost.addHeader("content-type", "application/json")
                 counterPost.entity = StringEntity(json)
 
                 lastUploadFailed = try {
                     val response = httpClient.execute(counterPost)
-                    assert(response.statusLine.statusCode == HttpStatus.SC_OK) { "upload failed" }
+                    assert(response.statusLine.statusCode == HttpStatus.SC_OK) { "upload failed: ${ response.statusLine }" }
 
                     state.savedCounters.subList(startIndex, endIndex).clear()
                     log.trace("Upload succeeded")
                     lastSuccessfulUpload = now
                     false
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     log.warn("Upload failed: $e")
                     true
                 } finally {
@@ -324,7 +337,14 @@ class Component :
                 null
             }
 
-            ProjectConfiguration(destination, name, emailLocation, email, networkAddress)
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            val trustSelfSignedCertificates = try {
+                configuration["trustSelfSignedCertificates"] as Boolean
+            } catch (e: Exception) {
+                false
+            }
+
+            ProjectConfiguration(destination, name, emailLocation, email, networkAddress, trustSelfSignedCertificates)
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
             return

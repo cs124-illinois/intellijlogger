@@ -1,3 +1,4 @@
-destination: http://localhost:8888
+destination: https://192.168.64.6/intellijplugin
 name: Plugin Tester
 emailLocation: email.txt
+trustSelfSignedCertificates: true
