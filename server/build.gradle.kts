@@ -1,5 +1,8 @@
 import java.util.*
 
+group = "edu.illinois.cs.cs125"
+version = "2019.9.1"
+
 plugins {
     kotlin("jvm")
     kotlin("kapt")

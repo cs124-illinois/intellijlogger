@@ -7,8 +7,6 @@ plugins {
     id("com.github.ben-manes.versions") version "0.23.0"
 }
 allprojects {
-    group = "edu.illinois.cs.cs125"
-    version = "2019.9"
     repositories {
         jcenter()
     }
