@@ -25,7 +25,7 @@
 
     <actions>
         <action id="CS125.ToolbarRunGroup.Grade"
-                class="edu.illinois.cs.cs125.intellijplugin.GradeAction"
+                class="edu.illinois.cs.cs125.intellijplugin.ButtonAction"
                 description="Initiate CS 125 MP grading"
                 icon="/icons/cs125.png">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>

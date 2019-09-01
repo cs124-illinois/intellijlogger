@@ -44,6 +44,8 @@ import java.time.Instant
 import java.util.*
 import kotlin.concurrent.timer
 
+val log = Logger.getInstance("edu.illinois.cs.cs125.intellijplugin")
+
 class Component :
         BaseComponent,
         CaretListener,
@@ -54,8 +56,6 @@ class Component :
         ProjectManagerListener,
         CompilationStatusListener,
         FileEditorManagerListener {
-
-    private val log = Logger.getInstance("edu.illinois.cs.cs125.intellijplugin")
 
     @NotNull
     override fun getComponentName(): String {
@@ -70,6 +70,7 @@ class Component :
             val emailLocation: String?,
             var email: String?,
             val networkAddress: String?,
+            val buttonAction: String?,
             val trustSelfSignedCertificates: Boolean
     )
 
@@ -237,8 +238,7 @@ class Component :
     private val stateTimerPeriodSec = 5
     private val maxSavedCounters = (2 * 60 * 60 / stateTimerPeriodSec) // 2 hours of logs
     private val uploadLogCountThreshold = (15 * 60 / stateTimerPeriodSec) // 15 minutes of logs
-    //private val shortestUploadWait = 10 * 60 * 1000 // 10 minutes
-    private val shortestUploadWait = 30 * 1000
+    private val shortestUploadWait = 10 * 60 * 1000 // 10 minutes
     private val shortestUploadInterval = 30 * 60 * 1000 // 30 minutes
 
     @Synchronized
@@ -337,6 +337,12 @@ class Component :
                 null
             }
 
+            val buttonAction = try {
+                configuration["buttonAction"]
+            } catch (e: Exception) {
+                null
+            }
+
             @Suppress("CAST_NEVER_SUCCEEDS")
             val trustSelfSignedCertificates = try {
                 configuration["trustSelfSignedCertificates"] as Boolean
@@ -344,7 +350,7 @@ class Component :
                 false
             }
 
-            ProjectConfiguration(destination, name, emailLocation, email, networkAddress, trustSelfSignedCertificates)
+            ProjectConfiguration(destination, name, emailLocation, email, networkAddress, buttonAction, trustSelfSignedCertificates)
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
             return
