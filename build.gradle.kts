@@ -4,7 +4,6 @@ plugins {
     val kotlinVersion = "1.3.50"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("kapt") version kotlinVersion apply false
-    maven
     id("com.github.ben-manes.versions") version "0.23.0"
 }
 allprojects {
@@ -12,7 +11,6 @@ allprojects {
     version = "2019.9"
     repositories {
         jcenter()
-        maven(url="https://jitpack.io")
     }
     tasks.withType<KotlinCompile> {
         val javaVersion = JavaVersion.VERSION_1_8.toString()

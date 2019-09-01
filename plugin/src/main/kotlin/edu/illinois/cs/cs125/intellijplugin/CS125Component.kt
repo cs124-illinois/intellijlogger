@@ -1,6 +1,5 @@
 package edu.illinois.cs.cs125.intellijplugin
 
-import com.google.gson.GsonBuilder
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.execution.testframework.TestStatusListener
@@ -27,6 +26,10 @@ import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiFile
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
@@ -38,6 +41,11 @@ import java.nio.file.Files
 import java.time.Instant
 import java.util.*
 import kotlin.concurrent.timer
+
+inline fun <reified T> Moshi.listAdapter(): JsonAdapter<List<T>> =
+        Types.newParameterizedType(
+                List::class.java, T::class.java
+        ).let { this.adapter<List<T>>(it) }
 
 class CS125Component :
         BaseComponent,
@@ -63,6 +71,8 @@ class CS125Component :
             var ignored: Int = 0,
             var interrupted: Int = 0
     )
+
+    @JsonClass(generateAdapter = true)
     data class Counter(
             var UUID: String = "",
             var index: Long = 0,
@@ -98,8 +108,13 @@ class CS125Component :
             var selectedFile: String = "",
             var opened: Boolean = false,
             var closed: Boolean = true
-    )
-    data class FileInfo (
+    ) {
+        companion object {
+            val counterListAdapter: JsonAdapter<List<Counter>> = Moshi.Builder().build().listAdapter()
+        }
+    }
+
+    data class FileInfo(
             var path: String = "",
             var lineCount: Int = 0
     )
@@ -124,6 +139,7 @@ class CS125Component :
                 counter.fileClosedCount +
                 counter.fileSelectionChangedCount
     }
+
     var currentProjectCounters = mutableMapOf<Project, Counter>()
 
     data class ProjectConfiguration(
@@ -133,6 +149,7 @@ class CS125Component :
             var email: String?,
             val networkAddress: String?
     )
+
     var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
 
     private val versionProperties = Properties()
@@ -172,7 +189,9 @@ class CS125Component :
         version = try {
             versionProperties.load(this.javaClass.getResourceAsStream("/version.properties"))
             versionProperties.getProperty("version")
-        } catch (e: Exception) { "" }
+        } catch (e: Exception) {
+            ""
+        }
 
         ApplicationManager.getApplication().invokeLater {
             EditorFactory.getInstance().eventMulticaster.addCaretListener(this)
@@ -232,7 +251,7 @@ class CS125Component :
             return
         }
 
-        val uploadCounterTask = object: Task.Backgroundable(project,"Uploading CS 125 logs...",
+        val uploadCounterTask = object : Task.Backgroundable(project, "Uploading CS 125 logs...",
                 false) {
             override fun run(progressIndicator: ProgressIndicator) {
                 val now = Instant.now().toEpochMilli()
@@ -243,8 +262,7 @@ class CS125Component :
                     return
                 }
 
-                val jsonCreator = GsonBuilder().create()
-                val countersInJSON = jsonCreator.toJson(uploadingCounters)
+                val countersInJSON = Counter.counterListAdapter.toJson(uploadingCounters)
 
                 val destination = projectConfiguration.destination
                 if (destination == "console") {
@@ -353,11 +371,14 @@ class CS125Component :
         val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
 
         val projectConfiguration = try {
-            val destination = configuration["destination"] ?: throw IllegalArgumentException("destination missing from configuration")
+            val destination = configuration["destination"]
+                    ?: throw IllegalArgumentException("destination missing from configuration")
             val name = configuration["name"] ?: throw IllegalArgumentException("name missing from configuration")
 
             val emailLocation = configuration["emailLocation"]
-            val email = if (emailLocation == null) { null } else {
+            val email = if (emailLocation == null) {
+                null
+            } else {
                 File(project.basePath.toString()).resolve(File(emailLocation)).let {
                     if (it.exists()) {
                         it.readText().trim()
@@ -375,7 +396,9 @@ class CS125Component :
                             .filter { it.address[0] != 10.toByte() }
                             .map { it.hostAddress }
                 }.first()
-            } catch (e: Exception) { null }
+            } catch (e: Exception) {
+                null
+            }
 
             ProjectConfiguration(destination, name, emailLocation, email, networkAddress)
         } catch (e: Exception) {
@@ -433,7 +456,7 @@ class CS125Component :
         return
     }
 
-    inner class TypedHandler: TypedHandlerDelegate() {
+    inner class TypedHandler : TypedHandlerDelegate() {
         override fun beforeCharTyped(char: Char, project: Project, editor: Editor, file: PsiFile, fileType: FileType): Result {
             val projectCounter = currentProjectCounters[project] ?: return Result.CONTINUE
             log.trace("charTyped (${projectCounter.keystrokeCount})")
@@ -443,7 +466,7 @@ class CS125Component :
     }
 
     inner class TestStatusHandler : TestStatusListener() {
-        override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?) { }
+        override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?) {}
         private fun countTests(abstractTestProxy: AbstractTestProxy, projectCounter: Counter) {
             if (!abstractTestProxy.isLeaf) {
                 for (child in abstractTestProxy.children) {
@@ -466,6 +489,7 @@ class CS125Component :
             }
             projectCounter.totalTestCount++
         }
+
         override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?, project: Project) {
             if (abstractTestProxy == null) {
                 return
@@ -482,12 +506,14 @@ class CS125Component :
         projectCounter.caretAdded++
         return
     }
+
     override fun caretRemoved(caretEvent: CaretEvent) {
         val projectCounter = currentProjectCounters[caretEvent.editor.project] ?: return
         log.trace("caretRemoved")
         projectCounter.caretRemoved++
         return
     }
+
     override fun caretPositionChanged(caretEvent: CaretEvent) {
         val projectCounter = currentProjectCounters[caretEvent.editor.project] ?: return
         log.trace("caretPositionChanged")
@@ -505,21 +531,25 @@ class CS125Component :
         log.trace("mousePressed")
         projectCounter.mousePressedCount++
     }
+
     override fun mouseClicked(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
         log.trace("mouseActivity")
         projectCounter.mouseActivityCount++
     }
+
     override fun mouseReleased(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
         log.trace("mouseActivity")
         projectCounter.mouseActivityCount++
     }
+
     override fun mouseEntered(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
         log.trace("mouseActivity")
         projectCounter.mouseActivityCount++
     }
+
     override fun mouseExited(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
         log.trace("mouseActivity")
@@ -546,7 +576,8 @@ class CS125Component :
                     info.email = documentEvent.document.text.trim()
                     log.debug("Updated email for project " + info.name + ": " + info.email)
                 }
-            } catch (e: Throwable) {}
+            } catch (e: Throwable) {
+            }
         }
 
         val editors = EditorFactory.getInstance().getEditors(documentEvent.document)
