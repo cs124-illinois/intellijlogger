@@ -17,6 +17,7 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild(majorIntelliJVersion)
+    untilBuild("$majorIntelliJVersion.*")
 }
 dependencies {
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.8.0")
