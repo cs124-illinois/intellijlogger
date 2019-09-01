@@ -1,4 +1,4 @@
-package edu.illinois.cs.cs125.intellijplugin.moshi
+package edu.illinois.cs.cs125.intellijlogger.moshi
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson

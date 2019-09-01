@@ -1,2 +1,2 @@
-rootProject.name = "intellijplugin"
+rootProject.name = "intellijlogger"
 include("plugin", "server")

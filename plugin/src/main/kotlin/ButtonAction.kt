@@ -1,4 +1,4 @@
-package edu.illinois.cs.cs125.intellijplugin
+package edu.illinois.cs.cs125.intellijlogger
 
 import com.intellij.execution.ProgramRunnerUtil
 import com.intellij.execution.RunManager

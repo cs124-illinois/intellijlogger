@@ -1,4 +1,4 @@
-package edu.illinois.cs.cs125.intellijplugin
+package edu.illinois.cs.cs125.intellijlogger
 
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.execution.testframework.AbstractTestProxy
@@ -44,7 +44,7 @@ import java.time.Instant
 import java.util.*
 import kotlin.concurrent.timer
 
-val log = Logger.getInstance("edu.illinois.cs.cs125.intellijplugin")
+val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 
 class Component :
         BaseComponent,

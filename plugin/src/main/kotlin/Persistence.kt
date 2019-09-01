@@ -1,4 +1,4 @@
-package edu.illinois.cs.cs125.intellijplugin
+package edu.illinois.cs.cs125.intellijlogger
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
@@ -6,7 +6,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import java.time.Instant
 
-@State(name = "Component", storages = [(Storage(file = "CS125Component.xml"))])
+@State(name = "Component", storages = [(Storage(file = "CS125intellijlogger.xml"))])
 class Persistence : PersistentStateComponent<Persistence.State> {
     class State {
         var activeCounters = mutableListOf<Counter>()

@@ -1,9 +1,9 @@
-package edu.illinois.cs.cs125.intellijplugin
+package edu.illinois.cs.cs125.intellijlogger
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import edu.illinois.cs.cs125.intellijplugin.moshi.Adapters
+import edu.illinois.cs.cs125.intellijlogger.moshi.Adapters
 import java.time.Instant
 
 @JsonClass(generateAdapter = true)

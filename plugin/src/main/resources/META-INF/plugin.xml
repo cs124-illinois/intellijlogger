@@ -1,28 +1,28 @@
 <idea-plugin>
-    <id>edu.illinois.cs.cs125.intellijplugin</id>
+    <id>edu.illinois.cs.cs125.intellijlogger</id>
     <name>CS 125 @ Illinois</name>
 
     <vendor email="challen@illinois.edu" url="https://cs125.cs.illinois.edu">CS 125 @ Illinois</vendor>
 
-    <description><![CDATA[ Enables MP development for CS 125 @ Illinois. ]]></description>
+    <description><![CDATA[ Records MP development for CS 125 @ Illinois. ]]></description>
 
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <typedHandler implementation="edu.illinois.cs.cs125.intellijplugin.Component$TypedHandler"/>
-        <testStatusListener implementation="edu.illinois.cs.cs125.intellijplugin.Component$TestStatusHandler"/>
-        <applicationService serviceImplementation="edu.illinois.cs.cs125.intellijplugin.Persistence"/>
+        <typedHandler implementation="edu.illinois.cs.cs125.intellijlogger.Component$TypedHandler"/>
+        <testStatusListener implementation="edu.illinois.cs.cs125.intellijlogger.Component$TestStatusHandler"/>
+        <applicationService serviceImplementation="edu.illinois.cs.cs125.intellijlogger.Persistence"/>
     </extensions>
 
     <application-components>
         <component>
-            <implementation-class>edu.illinois.cs.cs125.intellijplugin.Component</implementation-class>
+            <implementation-class>edu.illinois.cs.cs125.intellijlogger.Component</implementation-class>
         </component>
     </application-components>
 
     <actions>
         <action id="CS125.ToolbarRunGroup.Grade"
-                class="edu.illinois.cs.cs125.intellijplugin.ButtonAction"
+                class="edu.illinois.cs.cs125.intellijlogger.ButtonAction"
                 description="Initiate CS 125 MP grading"
                 icon="/icons/cs125.png">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>

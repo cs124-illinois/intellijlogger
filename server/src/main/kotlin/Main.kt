@@ -1,4 +1,4 @@
-package edu.illinois.cs.cs125.intellijplugin.server
+package edu.illinois.cs.cs125.intellijlogger.server
 
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
@@ -9,9 +9,9 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.json.toJson
 import com.uchuhimo.konf.source.yaml
-import edu.illinois.cs.cs125.intellijplugin.Counter
-import edu.illinois.cs.cs125.intellijplugin.Counters
-import edu.illinois.cs.cs125.intellijplugin.moshi.Adapters
+import edu.illinois.cs.cs125.intellijlogger.Counter
+import edu.illinois.cs.cs125.intellijlogger.Counters
+import edu.illinois.cs.cs125.intellijlogger.moshi.Adapters
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call

@@ -11,7 +11,7 @@ plugins {
     id("org.jetbrains.intellij") version "0.4.10"
 }
 intellij {
-    pluginName = "CS 125 Plugin"
+    pluginName = "CS 125 IntelliJ Activity Logger"
     version = "2019.1"
     sandboxDirectory = File(projectDir, "sandbox").absolutePath
 }

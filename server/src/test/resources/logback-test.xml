@@ -4,7 +4,7 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="edu.illinois.cs.cs125.intellijplugin" level="debug" />
+    <logger name="edu.illinois.cs.cs125.intellijlogger" level="debug" />
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>

@@ -36,11 +36,11 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 }
 application {
-    mainClassName = "edu.illinois.cs.cs125.intellijplugin.server.MainKt"
+    mainClassName = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
 }
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "edu.illinois.cs.cs125.intellijplugin.server.MainKt"
+        attributes["Main-Class"] = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
     }
 }
 task("createProperties") {
