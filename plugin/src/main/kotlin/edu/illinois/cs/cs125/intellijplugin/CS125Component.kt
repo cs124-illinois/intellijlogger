@@ -26,6 +26,7 @@ import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiFile
+import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
@@ -201,13 +202,15 @@ class CS125Component :
                 counterPost.entity = StringEntity(json)
 
                 lastUploadFailed = try {
-                    httpClient.execute(counterPost)
+                    val response = httpClient.execute(counterPost)
+                    assert(response.statusLine.statusCode == HttpStatus.SC_OK) { "upload failed" }
+
                     state.savedCounters.subList(startIndex, endIndex).clear()
                     log.trace("Upload succeeded")
                     lastSuccessfulUpload = now
                     false
                 } catch (e: Exception) {
-                    log.warn("Upload failed")
+                    log.warn("Upload failed: $e")
                     true
                 } finally {
                     uploadBusy = false
@@ -221,7 +224,8 @@ class CS125Component :
     private val stateTimerPeriodSec = 5
     private val maxSavedCounters = (2 * 60 * 60 / stateTimerPeriodSec) // 2 hours of logs
     private val uploadLogCountThreshold = (15 * 60 / stateTimerPeriodSec) // 15 minutes of logs
-    private val shortestUploadWait = 10 * 60 * 1000 // 10 minutes
+    //private val shortestUploadWait = 10 * 60 * 1000 // 10 minutes
+    private val shortestUploadWait = 30 * 1000
     private val shortestUploadInterval = 30 * 60 * 1000 // 30 minutes
 
     @Synchronized
@@ -286,7 +290,7 @@ class CS125Component :
             log.trace("no project configuration found")
             return
         }
-        
+
         val projectConfiguration = try {
             @Suppress("UNCHECKED_CAST")
             val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
