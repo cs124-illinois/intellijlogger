@@ -17,6 +17,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
+import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -49,7 +50,7 @@ class CS125Component :
         CompilationStatusListener,
         FileEditorManagerListener {
 
-    private val log = Logger.getInstance("edu.illinois.cs.cs125")
+    private val log = Logger.getInstance("edu.illinois.cs.cs125.intellijplugin")
 
     @NotNull
     override fun getComponentName(): String {
@@ -67,8 +68,8 @@ class CS125Component :
             var index: Long = 0,
             var previousIndex: Long = -1,
             var MP: String = "",
-            var email: String = "",
-            var sentIPAddress: String = "",
+            var email: String? = null,
+            var sentIPAddress: String? = null,
             var version: String = "",
             var start: Long = Instant.now().toEpochMilli(),
             var end: Long = 0,
@@ -78,6 +79,7 @@ class CS125Component :
             var caretPositionChangedCount: Int = 0,
             var visibleAreaChangedCount: Int = 0,
             var mousePressedCount: Int = 0,
+            var mouseActivityCount: Int = 0,
             var selectionChangedCount: Int = 0,
             var documentChangedCount: Int = 0,
             var compileCount: Int = 0,
@@ -109,6 +111,7 @@ class CS125Component :
                 counter.caretPositionChangedCount +
                 counter.visibleAreaChangedCount +
                 counter.mousePressedCount +
+                counter.mouseActivityCount +
                 counter.visibleAreaChangedCount +
                 counter.documentChangedCount +
                 counter.successfulCompileCount +
@@ -123,12 +126,14 @@ class CS125Component :
     }
     var currentProjectCounters = mutableMapOf<Project, Counter>()
 
-    data class ProjectInfo(
-            var MP: String,
-            var email: String,
-            var networkAddress: String
+    data class ProjectConfiguration(
+            val destination: String,
+            val name: String,
+            val emailLocation: String?,
+            var email: String?,
+            val networkAddress: String?
     )
-    var projectInfo = mutableMapOf<Project, ProjectInfo>()
+    var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
 
     private val versionProperties = Properties()
     private var version = ""
@@ -232,11 +237,28 @@ class CS125Component :
             override fun run(progressIndicator: ProgressIndicator) {
                 val now = Instant.now().toEpochMilli()
 
-                val jsonCreator = GsonBuilder().create()
-                val httpClient = HttpClientBuilder.create().build()
+                val projectConfiguration = projectConfigurations[project]
+                if (projectConfiguration == null) {
+                    log.warn("no configuration for project in uploadTask")
+                    return
+                }
 
+                val jsonCreator = GsonBuilder().create()
                 val countersInJSON = jsonCreator.toJson(uploadingCounters)
-                val counterPost = HttpPost("https://cs125-reporting.cs.illinois.edu/intellij")
+
+                val destination = projectConfiguration.destination
+                if (destination == "console") {
+                    log.warn("Uploading to console")
+                    log.trace(countersInJSON)
+                    state.savedCounters.subList(startIndex, endIndex).clear()
+                    log.trace("Upload succeeded")
+                    lastSuccessfulUpload = now
+                    lastUploadFailed = false
+                    return
+                }
+
+                val httpClient = HttpClientBuilder.create().build()
+                val counterPost = HttpPost(destination)
                 counterPost.addHeader("content-type", "application/json")
                 counterPost.entity = StringEntity(countersInJSON)
 
@@ -296,9 +318,9 @@ class CS125Component :
                     state.UUID,
                     state.counterIndex++,
                     counter.index,
-                    projectInfo[project]?.MP ?: "",
-                    projectInfo[project]?.email ?: "",
-                    projectInfo[project]?.networkAddress ?: "",
+                    projectConfigurations[project]?.name ?: "",
+                    projectConfigurations[project]?.email ?: "",
+                    projectConfigurations[project]?.networkAddress ?: "",
                     version
             )
             currentProjectCounters[project] = newCounter
@@ -318,46 +340,60 @@ class CS125Component :
     }
 
     private var stateTimer: Timer? = null
-
     override fun projectOpened(project: Project) {
         log.trace("projectOpened")
 
-        val gradeConfigurationFile = File(project.basePath.toString()).resolve(File("config/grade.yaml"))
-        if (!gradeConfigurationFile.exists()) {
+        val configurationFile = File(project.basePath.toString()).resolve(File(".intellijlogger.yaml"))
+        if (!configurationFile.exists()) {
+            log.trace("no project configuration found")
             return
         }
 
         @Suppress("UNCHECKED_CAST")
-        val gradeConfiguration = Yaml().load(Files.newBufferedReader(gradeConfigurationFile.toPath()))
-                as Map<String, String>
-        val name = gradeConfiguration["name"] ?: return
+        val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
 
-        val emailFile = File(project.basePath.toString()).resolve(File("email.txt"))
-        var email = ""
-        if (emailFile.exists()) {
-            email = emailFile.readText().trim()
+        val projectConfiguration = try {
+            val destination = configuration["destination"] ?: throw IllegalArgumentException("destination missing from configuration")
+            val name = configuration["name"] ?: throw IllegalArgumentException("name missing from configuration")
+
+            val emailLocation = configuration["emailLocation"]
+            val email = if (emailLocation == null) { null } else {
+                File(project.basePath.toString()).resolve(File(emailLocation)).let {
+                    if (it.exists()) {
+                        it.readText().trim()
+                    } else {
+                        null
+                    }
+                }
+            }
+
+            val networkAddress = try {
+                NetworkInterface.getNetworkInterfaces().toList().flatMap { networkInterface ->
+                    networkInterface.inetAddresses.toList()
+                            .filter { it.address.size == 4 }
+                            .filter { !it.isLoopbackAddress }
+                            .filter { it.address[0] != 10.toByte() }
+                            .map { it.hostAddress }
+                }.first()
+            } catch (e: Exception) { null }
+
+            ProjectConfiguration(destination, name, emailLocation, email, networkAddress)
+        } catch (e: Exception) {
+            log.debug("Can't load project configuration: $e")
+            return
         }
 
-        val networkAddress = try {
-            NetworkInterface.getNetworkInterfaces().toList().flatMap { networkInterface ->
-                networkInterface.inetAddresses.toList()
-                        .filter { it.address.size == 4 }
-                        .filter { !it.isLoopbackAddress }
-                        .filter { it.address[0] != 10.toByte() }
-                        .map { it.hostAddress }
-            }.first()
-        } catch (e: Exception) { "" }
-
-        projectInfo[project] = ProjectInfo(name, email, networkAddress)
+        log.trace(projectConfiguration.toString())
+        projectConfigurations[project] = projectConfiguration
 
         val state = CS125Persistence.getInstance().persistentState
 
         val newCounter = Counter(state.UUID,
                 state.counterIndex++,
                 -1,
-                name,
-                email,
-                networkAddress,
+                projectConfiguration.name,
+                projectConfiguration.email,
+                projectConfiguration.networkAddress,
                 version)
         newCounter.opened = true
         currentProjectCounters[project] = newCounter
@@ -398,9 +434,9 @@ class CS125Component :
     }
 
     inner class TypedHandler: TypedHandlerDelegate() {
-        override fun charTyped(c: Char, project: Project, editor: Editor, file: PsiFile): Result {
+        override fun beforeCharTyped(char: Char, project: Project, editor: Editor, file: PsiFile, fileType: FileType): Result {
             val projectCounter = currentProjectCounters[project] ?: return Result.CONTINUE
-            log.trace("charTyped")
+            log.trace("charTyped (${projectCounter.keystrokeCount})")
             projectCounter.keystrokeCount++
             return Result.CONTINUE
         }
@@ -469,10 +505,26 @@ class CS125Component :
         log.trace("mousePressed")
         projectCounter.mousePressedCount++
     }
-    override fun mouseClicked(e: EditorMouseEvent) {}
-    override fun mouseReleased(e: EditorMouseEvent) {}
-    override fun mouseEntered(e: EditorMouseEvent) {}
-    override fun mouseExited(e: EditorMouseEvent) {}
+    override fun mouseClicked(editorMouseEvent: EditorMouseEvent) {
+        val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
+        log.trace("mouseActivity")
+        projectCounter.mouseActivityCount++
+    }
+    override fun mouseReleased(editorMouseEvent: EditorMouseEvent) {
+        val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
+        log.trace("mouseActivity")
+        projectCounter.mouseActivityCount++
+    }
+    override fun mouseEntered(editorMouseEvent: EditorMouseEvent) {
+        val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
+        log.trace("mouseActivity")
+        projectCounter.mouseActivityCount++
+    }
+    override fun mouseExited(editorMouseEvent: EditorMouseEvent) {
+        val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
+        log.trace("mouseActivity")
+        projectCounter.mouseActivityCount++
+    }
 
     override fun selectionChanged(selectionEvent: SelectionEvent) {
         val projectCounter = currentProjectCounters[selectionEvent.editor.project] ?: return
@@ -484,12 +536,15 @@ class CS125Component :
         log.trace("documentChanged")
 
         val changedFile = FileDocumentManager.getInstance().getFile(documentEvent.document)
-        for ((project, info) in projectInfo) {
+        for ((project, info) in projectConfigurations) {
+            if (info.emailLocation == null) {
+                continue
+            }
             try {
-                val emailPath = File(project.basePath.toString()).resolve(File("email.txt")).canonicalPath
+                val emailPath = File(project.basePath.toString()).resolve(File(info.emailLocation)).canonicalPath
                 if (changedFile?.canonicalPath.equals(emailPath)) {
                     info.email = documentEvent.document.text.trim()
-                    log.debug("Updated email for project " + info.MP + ": " + info.email)
+                    log.debug("Updated email for project " + info.name + ": " + info.email)
                 }
             } catch (e: Throwable) {}
         }

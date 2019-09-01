@@ -30,7 +30,7 @@ class CS125GradeAction : AnAction() {
     override fun update(anActionEvent: AnActionEvent) {
         log.trace("update")
         val project = anActionEvent.project
-        val isVisible = project?.getComponent(CS125Component::class.java)?.projectInfo?.containsKey(project) ?: false
+        val isVisible = project?.getComponent(CS125Component::class.java)?.projectConfigurations?.containsKey(project) ?: false
         anActionEvent.presentation.isVisible = isVisible
     }
 }

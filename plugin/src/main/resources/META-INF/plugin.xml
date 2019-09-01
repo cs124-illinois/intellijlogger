@@ -14,8 +14,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <typedHandler implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TypedHandler"/>
         <testStatusListener implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TestStatusHandler"/>
-        <applicationService
-                serviceImplementation="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"/>
+        <applicationService serviceImplementation="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"/>
     </extensions>
 
     <application-components>
