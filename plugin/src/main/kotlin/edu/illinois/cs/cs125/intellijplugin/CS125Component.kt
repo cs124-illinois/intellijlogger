@@ -29,7 +29,6 @@ import com.intellij.psi.PsiFile
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
@@ -41,11 +40,6 @@ import java.nio.file.Files
 import java.time.Instant
 import java.util.*
 import kotlin.concurrent.timer
-
-inline fun <reified T> Moshi.listAdapter(): JsonAdapter<List<T>> =
-        Types.newParameterizedType(
-                List::class.java, T::class.java
-        ).let { this.adapter<List<T>>(it) }
 
 class CS125Component :
         BaseComponent,
@@ -73,6 +67,12 @@ class CS125Component :
     )
 
     @JsonClass(generateAdapter = true)
+    data class Counters(val counters: List<Counter>) {
+        companion object {
+            val adapter: JsonAdapter<Counters> = Moshi.Builder().build().adapter(Counters::class.java)
+        }
+    }
+
     data class Counter(
             var UUID: String = "",
             var index: Long = 0,
@@ -108,11 +108,7 @@ class CS125Component :
             var selectedFile: String = "",
             var opened: Boolean = false,
             var closed: Boolean = true
-    ) {
-        companion object {
-            val counterListAdapter: JsonAdapter<List<Counter>> = Moshi.Builder().build().listAdapter()
-        }
-    }
+    )
 
     data class FileInfo(
             var path: String = "",
@@ -262,12 +258,16 @@ class CS125Component :
                     return
                 }
 
-                val countersInJSON = Counter.counterListAdapter.toJson(uploadingCounters)
+                val json = Counters.adapter.toJson(Counters(uploadingCounters))
+                if (json == null) {
+                    log.warn("couldn't convert counters to JSON")
+                    return
+                }
 
                 val destination = projectConfiguration.destination
                 if (destination == "console") {
                     log.warn("Uploading to console")
-                    log.trace(countersInJSON)
+                    log.trace(json)
                     state.savedCounters.subList(startIndex, endIndex).clear()
                     log.trace("Upload succeeded")
                     lastSuccessfulUpload = now
@@ -278,7 +278,7 @@ class CS125Component :
                 val httpClient = HttpClientBuilder.create().build()
                 val counterPost = HttpPost(destination)
                 counterPost.addHeader("content-type", "application/json")
-                counterPost.entity = StringEntity(countersInJSON)
+                counterPost.entity = StringEntity(json)
 
                 lastUploadFailed = try {
                     httpClient.execute(counterPost)

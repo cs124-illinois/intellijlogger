@@ -24,11 +24,13 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.8.0")
 }
 task("createProperties") {
-    dependsOn(tasks.processResources)
     doLast {
         val properties = Properties().also {
             it["version"] = project.version.toString()
         }
         File(projectDir, "src/main/resources/version.properties").printWriter().use { properties.store(it, null) }
     }
+}
+tasks.processResources {
+    dependsOn("createProperties")
 }
