@@ -7,7 +7,7 @@
 
     <description><![CDATA[ Enables MP development for CS 125 @ Illinois. ]]></description>
 
-    <idea-version since-build="191" until-build="191.*" />
+    <idea-version since-build="191" />
 
     <depends>com.intellij.modules.lang</depends>
 
@@ -15,7 +15,6 @@
         <typedHandler implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TypedHandler"/>
         <testStatusListener implementation="edu.illinois.cs.cs125.intellijplugin.CS125Component$TestStatusHandler"/>
         <applicationService
-                serviceInterface="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"
                 serviceImplementation="edu.illinois.cs.cs125.intellijplugin.CS125Persistence"/>
     </extensions>
 

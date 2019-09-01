@@ -6,18 +6,14 @@ plugins {
   id("org.jetbrains.intellij") version "0.4.10"
 }
 
-group = "edu.illinois.cs.cs125"
-version = "2019.9"
 
-val intellijVersion = "2019.1"
 intellij {
     pluginName = "CS 125 Plugin"
-    version = intellijVersion
+    version = "2019.1"
     sandboxDirectory = File(projectDir, "sandbox").absolutePath
 }
 tasks.patchPluginXml {
     sinceBuild("191")
-    untilBuild("191.*")
 }
 dependencies {
     implementation(kotlin("stdlib"))
