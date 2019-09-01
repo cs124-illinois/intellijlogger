@@ -26,9 +26,6 @@ import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiFile
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
@@ -57,83 +54,6 @@ class CS125Component :
     @NotNull
     override fun getComponentName(): String {
         return "CS125 Plugin"
-    }
-
-    data class TestCounter(
-            var passed: Int = 0,
-            var failed: Int = 0,
-            var ignored: Int = 0,
-            var interrupted: Int = 0
-    )
-
-    @JsonClass(generateAdapter = true)
-    data class Counters(val counters: List<Counter>) {
-        companion object {
-            val adapter: JsonAdapter<Counters> = Moshi.Builder().build().adapter(Counters::class.java)
-        }
-    }
-
-    data class Counter(
-            var UUID: String = "",
-            var index: Long = 0,
-            var previousIndex: Long = -1,
-            var MP: String = "",
-            var email: String? = null,
-            var sentIPAddress: String? = null,
-            var version: String = "",
-            var start: Long = Instant.now().toEpochMilli(),
-            var end: Long = 0,
-            var keystrokeCount: Int = 0,
-            var caretAdded: Int = 0,
-            var caretRemoved: Int = 0,
-            var caretPositionChangedCount: Int = 0,
-            var visibleAreaChangedCount: Int = 0,
-            var mousePressedCount: Int = 0,
-            var mouseActivityCount: Int = 0,
-            var selectionChangedCount: Int = 0,
-            var documentChangedCount: Int = 0,
-            var compileCount: Int = 0,
-            var successfulCompileCount: Int = 0,
-            var failedCompileCount: Int = 0,
-            var compilerErrorCount: Int = 0,
-            var compilerWarningCount: Int = 0,
-            var gradingCount: Int = 0,
-            var totalTestCount: Int = 0,
-            var testCounts: MutableMap<String, TestCounter> = mutableMapOf(),
-            var fileOpenedCount: Int = 0,
-            var fileClosedCount: Int = 0,
-            var fileSelectionChangedCount: Int = 0,
-            var openFiles: MutableList<FileInfo> = mutableListOf(),
-            var openFileCount: Int = 0,
-            var selectedFile: String = "",
-            var opened: Boolean = false,
-            var closed: Boolean = true
-    )
-
-    data class FileInfo(
-            var path: String = "",
-            var lineCount: Int = 0
-    )
-
-    private fun totalCount(counter: Counter): Int {
-        return counter.keystrokeCount +
-                counter.caretAdded +
-                counter.caretRemoved +
-                counter.caretPositionChangedCount +
-                counter.visibleAreaChangedCount +
-                counter.mousePressedCount +
-                counter.mouseActivityCount +
-                counter.visibleAreaChangedCount +
-                counter.documentChangedCount +
-                counter.successfulCompileCount +
-                counter.failedCompileCount +
-                counter.compilerErrorCount +
-                counter.compilerWarningCount +
-                counter.gradingCount +
-                counter.totalTestCount +
-                counter.fileOpenedCount +
-                counter.fileClosedCount +
-                counter.fileSelectionChangedCount
     }
 
     var currentProjectCounters = mutableMapOf<Project, Counter>()
@@ -312,7 +232,7 @@ class CS125Component :
         val end = Instant.now().toEpochMilli()
 
         for ((project, counter) in currentProjectCounters) {
-            if (totalCount(counter) == 0) {
+            if (counter.isEmpty()) {
                 continue
             }
             counter.end = end
@@ -366,11 +286,11 @@ class CS125Component :
             log.trace("no project configuration found")
             return
         }
-
-        @Suppress("UNCHECKED_CAST")
-        val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
-
+        
         val projectConfiguration = try {
+            @Suppress("UNCHECKED_CAST")
+            val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
+
             val destination = configuration["destination"]
                     ?: throw IllegalArgumentException("destination missing from configuration")
             val name = configuration["name"] ?: throw IllegalArgumentException("name missing from configuration")

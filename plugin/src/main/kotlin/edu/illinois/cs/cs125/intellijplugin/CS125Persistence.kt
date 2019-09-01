@@ -9,8 +9,8 @@ import java.time.Instant
 @State(name = "CS125Component", storages = [(Storage(file = "CS125Component.xml"))])
 class CS125Persistence : PersistentStateComponent<CS125Persistence.State> {
     class State {
-        var activeCounters = mutableListOf<CS125Component.Counter>()
-        var savedCounters = mutableListOf<CS125Component.Counter>()
+        var activeCounters = mutableListOf<Counter>()
+        var savedCounters = mutableListOf<Counter>()
         var counterIndex = 0L
         var UUID: String = ""
         var lastSave: Long = -1

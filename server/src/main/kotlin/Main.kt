@@ -9,7 +9,9 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.json.toJson
 import com.uchuhimo.konf.source.yaml
-import edu.illinois.cs.cs125.intellijplugin.CS125Component
+import edu.illinois.cs.cs125.intellijplugin.Counter
+import edu.illinois.cs.cs125.intellijplugin.Counters
+import edu.illinois.cs.cs125.intellijplugin.moshi.Adapters
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
@@ -64,26 +66,19 @@ val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mong
 
 @JsonClass(generateAdapter = true)
 data class ReceivedCounter(
-        val counter: CS125Component.Counter,
+        val version: String?,
+        val counter: Counter,
         val receivedTime: Instant,
         val receivedIP: String,
         val receivedSemester: String?
 ) {
     companion object {
-        val adapter: JsonAdapter<ReceivedCounter> = Moshi.Builder().build().adapter(ReceivedCounter::class.java)
+        val adapter: JsonAdapter<ReceivedCounter> = Moshi.Builder().also { builder ->
+            Adapters.forEach { builder.add(it) }
+        }.build().adapter(ReceivedCounter::class.java)
     }
 }
 @Suppress("unused")
-class InstantAdapter {
-    @FromJson
-    fun instantFromJson(timestamp: String): Instant {
-        return Instant.parse(timestamp)
-    }
-    @ToJson
-    fun instantToJson(instant: Instant): String {
-        return instant.toString()
-    }
-}
 
 fun Application.intellijlogger() {
     install(XForwardedHeaderSupport)
@@ -92,7 +87,7 @@ fun Application.intellijlogger() {
     }
     install(ContentNegotiation) {
         moshi {
-            this.add(InstantAdapter())
+            Adapters.forEach { this.add(it) }
         }
     }
     routing {
@@ -101,8 +96,9 @@ fun Application.intellijlogger() {
         }
         post("/") {
             val upload = try {
-                call.receive<CS125Component.Counters>()
+                call.receive<Counters>()
             } catch (e: Exception) {
+                logger.warn { "couldn't deserialize counters: $e" }
                 call.respond(HttpStatusCode.BadRequest)
                 currentStatus.failureCount++
                 return@post
@@ -114,14 +110,16 @@ fun Application.intellijlogger() {
                 val receivedSemester = configuration[TopLevel.semester]
 
                 val receivedCounters = upload.counters.map { counter ->
-                    val receivedCounter = ReceivedCounter(counter, receivedTime, receivedIP, receivedSemester)
+                    val receivedCounter = ReceivedCounter(currentStatus.version, counter, receivedTime, receivedIP, receivedSemester)
                     BsonDocument.parse(ReceivedCounter.adapter.toJson(receivedCounter))
                 }
                 mongoCollection.insertMany(receivedCounters)
                 currentStatus.uploadCount += receivedCounters.size
 
+                logger.debug { "${ receivedCounters.size } counters uploaded" }
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
+                logger.warn { "couldn't save counters: $e" }
                 call.respond(HttpStatusCode.InternalServerError)
                 currentStatus.failureCount++
                 return@post
