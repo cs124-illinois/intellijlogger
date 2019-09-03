@@ -119,7 +119,7 @@ fun Application.intellijlogger() {
 
                 val receivedCounters = upload.counters.map { counter ->
                     BsonDocument.parse(adapter.toJson(counter))
-                            .append("version", version)
+                            .append("receivedVersion", version)
                             .append("receivedTime", receivedTime)
                             .append("receivedIP", receivedIP)
                             .append("receivedSemester", receivedSemester)
