@@ -29,7 +29,9 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import mu.KotlinLogging
+import org.bson.BsonDateTime
 import org.bson.BsonDocument
+import org.bson.BsonString
 import java.io.File
 import java.net.URI
 import java.time.Instant
@@ -59,26 +61,32 @@ val configuration = Config {
 
 val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mongo].run {
     val uri = MongoClientURI(this)
-    val database = uri.database ?: assert {"MONGO must specify database to use" }
+    val database = uri.database ?: assert { "MONGO must specify database to use" }
     val collection = configuration[TopLevel.mongoCollection]
     MongoClient(uri).getDatabase(database).getCollection(collection, BsonDocument::class.java)
 }
 
-@JsonClass(generateAdapter = true)
-data class ReceivedCounter(
-        val version: String?,
-        val counter: Counter,
-        val receivedTime: Instant,
-        val receivedIP: String,
-        val receivedSemester: String?
-) {
-    companion object {
-        val adapter: JsonAdapter<ReceivedCounter> = Moshi.Builder().also { builder ->
-            Adapters.forEach { builder.add(it) }
-        }.build().adapter(ReceivedCounter::class.java)
-    }
-}
 @Suppress("unused")
+@JsonClass(generateAdapter = true)
+class Status {
+    var version: String? = try {
+        Properties().also {
+            it.load(this.javaClass.getResourceAsStream("/version.properties"))
+        }.getProperty("version")
+    } catch (e: Exception) {
+        null
+    }
+    var upSince: Instant = Instant.now()
+    var uploadCount: Int = 0
+    var failureCount: Int = 0
+}
+val currentStatus = Status()
+
+val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
+    Adapters.forEach { builder.add(it) }
+}.build().adapter(Counter::class.java)
+
+val version = BsonString(currentStatus.version)
 
 fun Application.intellijlogger() {
     install(XForwardedHeaderSupport)
@@ -105,13 +113,16 @@ fun Application.intellijlogger() {
             }
 
             try {
-                val receivedTime = Instant.now()
-                val receivedIP = call.request.origin.remoteHost
-                val receivedSemester = configuration[TopLevel.semester]
+                val receivedTime = BsonDateTime(Instant.now().toEpochMilli())
+                val receivedIP = BsonString(call.request.origin.remoteHost)
+                val receivedSemester = BsonString(configuration[TopLevel.semester])
 
                 val receivedCounters = upload.counters.map { counter ->
-                    val receivedCounter = ReceivedCounter(currentStatus.version, counter, receivedTime, receivedIP, receivedSemester)
-                    BsonDocument.parse(ReceivedCounter.adapter.toJson(receivedCounter))
+                    BsonDocument.parse(adapter.toJson(counter))
+                            .append("version", version)
+                            .append("receivedTime", receivedTime)
+                            .append("receivedIP", receivedIP)
+                            .append("receivedSemester", receivedSemester)
                 }
                 mongoCollection.insertMany(receivedCounters)
                 currentStatus.uploadCount += receivedCounters.size
@@ -131,22 +142,7 @@ fun Application.intellijlogger() {
     }
 }
 
-@JsonClass(generateAdapter = true)
-class Status(var version: String? = null, var uploadCount: Int = 0, var failureCount: Int = 0) {
-    init {
-        version = try {
-            Properties().also {
-                it.load(this.javaClass.getResourceAsStream("/version.properties"))
-            }.getProperty("version")
-        } catch (e: Exception) {
-            null
-        }
-    }
-}
-val currentStatus = Status()
-
 fun main() {
-    println(currentStatus.version)
     logger.info(configuration.toJson.toText())
 
     val uri = URI(configuration[TopLevel.http])

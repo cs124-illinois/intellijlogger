@@ -1,4 +1,9 @@
 FROM openjdk:10.0.2-13-jdk-slim
-COPY build/libs/server-*-all.jar /intellijlogger.jar
+
+RUN apt update && \
+    apt full-upgrade -y && \
+    apt autoremove -y --purge
+
 WORKDIR /
-ENTRYPOINT ["java", "-jar", "intellijlogger.jar"]
+COPY build/libs/server-*-all.jar intellijlogger.jar
+ENTRYPOINT java -jar intellijlogger.jar
