@@ -8,11 +8,7 @@ plugins {
     kotlin("kapt")
     application
     id("com.github.johnrengelman.shadow") version "5.1.0"
-}
-tasks.test {
-    useJUnitPlatform()
-    systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback-test.xml").absolutePath
-    environment("MONGO", "mongodb://localhost:27017/testing")
+    id("com.palantir.docker") version "0.22.1"
 }
 dependencies {
     val ktorVersion = "1.2.2"
@@ -26,21 +22,31 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.8.0")
     implementation("com.ryanharter.ktor:ktor-moshi:1.0.1")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.uchuhimo:konf-core:0.15.1")
-    implementation("com.uchuhimo:konf-yaml:0.15.1")
+    implementation("com.uchuhimo:konf-core:0.17.0")
+    implementation("com.uchuhimo:konf-yaml:0.17.0")
     implementation("io.github.microutils:kotlin-logging:1.7.6")
 
-    val kotlintestVersion = "3.4.0"
+    val kotlintestVersion = "3.4.1"
     testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlintestVersion")
     testImplementation("io.kotlintest:kotlintest-assertions-ktor:$kotlintestVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 }
+val mainClass = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
 application {
-    mainClassName = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
+    mainClassName = mainClass
+}
+docker {
+    name = "cs125/intellijlogger"
+    files(tasks["shadowJar"].outputs)
+}
+tasks.test {
+    useJUnitPlatform()
+    systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback-test.xml").absolutePath
+    environment("MONGO", "mongodb://localhost:27017/testing")
 }
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
+        attributes["Main-Class"] = mainClass
     }
 }
 task("createProperties") {
