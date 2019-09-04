@@ -77,6 +77,7 @@ class Status {
         null
     }
     var upSince: Instant = Instant.now()
+    var statusCount: Int = 0
     var uploadCount: Int = 0
     var failureCount: Int = 0
 }
@@ -101,6 +102,7 @@ fun Application.intellijlogger() {
     routing {
         get("/") {
             call.respond(currentStatus)
+            currentStatus.statusCount++
         }
         post("/") {
             val upload = try {

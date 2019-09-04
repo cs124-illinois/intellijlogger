@@ -1,5 +1,6 @@
 package edu.illinois.cs.cs125.intellijlogger
 
+import com.intellij.openapi.application.ApplicationInfo
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -50,7 +51,8 @@ data class Counter(
         var openFileCount: Int = 0,
         var selectedFile: String = "",
         var opened: Boolean = false,
-        var closed: Boolean = true
+        var closed: Boolean = true,
+        var intelliJVersion: String = ApplicationInfo.getInstance().strictVersion
 ) {
     fun totalCount(): Int {
         return keystrokeCount +

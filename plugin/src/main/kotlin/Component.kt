@@ -46,6 +46,10 @@ import kotlin.concurrent.timer
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 
+val version: String = Properties().also {
+    it.load((object : Any() {}).javaClass.getResourceAsStream("/version.properties"))
+}.getProperty("version")
+
 class Component :
         BaseComponent,
         CaretListener,
@@ -75,9 +79,6 @@ class Component :
     )
 
     var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
-
-    private val versionProperties = Properties()
-    private var version = ""
 
     override fun initComponent() {
         log.trace("initComponent")
@@ -109,13 +110,6 @@ class Component :
             state.savedCounters.add(counter)
         }
         state.activeCounters.clear()
-
-        version = try {
-            versionProperties.load(this.javaClass.getResourceAsStream("/version.properties"))
-            versionProperties.getProperty("version")
-        } catch (e: Exception) {
-            ""
-        }
 
         ApplicationManager.getApplication().invokeLater {
             EditorFactory.getInstance().eventMulticaster.addCaretListener(this)

@@ -1,12 +1,10 @@
 package edu.illinois.cs.cs125.intellijlogger
 
-import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.*
 import java.time.Instant
 
-@State(name = "Component", storages = [(Storage(file = "CS125intellijlogger.xml"))])
+@Suppress("unused")
+@State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.xml"))])
 class Persistence : PersistentStateComponent<Persistence.State> {
     class State {
         var activeCounters = mutableListOf<Counter>()
@@ -14,6 +12,7 @@ class Persistence : PersistentStateComponent<Persistence.State> {
         var counterIndex = 0L
         var UUID: String = ""
         var lastSave: Long = -1
+        val pluginVersion: String = version
     }
     var persistentState = State()
     override fun getState() : State {

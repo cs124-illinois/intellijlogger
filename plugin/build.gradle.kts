@@ -1,6 +1,6 @@
 import java.util.*
 
-val majorIntelliJVersion = "192"
+val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
 version = "2019.9.1.$majorIntelliJVersion"
 
@@ -17,7 +17,7 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild(majorIntelliJVersion)
-    untilBuild("$majorIntelliJVersion.*")
+    untilBuild("192.*")
 }
 dependencies {
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.8.0")
