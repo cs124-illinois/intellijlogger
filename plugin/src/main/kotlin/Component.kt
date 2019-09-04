@@ -3,6 +3,7 @@ package edu.illinois.cs.cs125.intellijlogger
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.execution.testframework.TestStatusListener
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.compiler.CompilationStatusListener
 import com.intellij.openapi.compiler.CompileContext
@@ -49,6 +50,7 @@ val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 val version: String = Properties().also {
     it.load((object : Any() {}).javaClass.getResourceAsStream("/version.properties"))
 }.getProperty("version")
+val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 
 class Component :
         BaseComponent,
@@ -270,7 +272,8 @@ class Component :
                     projectConfigurations[project]?.name,
                     projectConfigurations[project]?.email,
                     projectConfigurations[project]?.networkAddress,
-                    version
+                    version,
+                    intelliJVersion = intellijVersion
             )
             currentProjectCounters[project] = newCounter
             state.activeCounters.add(newCounter)
@@ -361,7 +364,9 @@ class Component :
                 projectConfiguration.name,
                 projectConfiguration.email,
                 projectConfiguration.networkAddress,
-                version)
+                version,
+                intelliJVersion = intellijVersion
+        )
         newCounter.opened = true
         currentProjectCounters[project] = newCounter
         state.activeCounters.add(newCounter)

@@ -1,5 +1,4 @@
-destination: https://192.168.64.6/intellijplugin
-name: Plugin Tester
+destination: https://cs125-cloud.cs.illinois.edu/intellijlogger/
+name: "intellijlogger:tester"
 emailLocation: email.txt
-trustSelfSignedCertificates: true
 buttonAction: "Grade.*"
