@@ -40,14 +40,18 @@ import java.util.*
 @Suppress("UNUSED")
 private val logger = KotlinLogging.logger {}
 
+val VERSION: String = Properties().also {
+    it.load((object : Any() {}).javaClass.getResourceAsStream("/version.properties"))
+}.getProperty("version")
+
+const val NAME = "intellijlogger"
 const val DEFAULT_HTTP = "http://0.0.0.0:8888"
-const val DEFAULT_MONGO_COLLECTION = "intellijlogger"
 
 object TopLevel : ConfigSpec("") {
     val http by optional(DEFAULT_HTTP)
     val semester by optional<String?>(null)
     val mongo by required<String>()
-    val mongoCollection by optional(DEFAULT_MONGO_COLLECTION)
+    val mongoCollection by optional(NAME)
 }
 
 val configuration = Config {
@@ -69,13 +73,8 @@ val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mong
 @Suppress("unused")
 @JsonClass(generateAdapter = true)
 class Status {
-    var version: String? = try {
-        Properties().also {
-            it.load(this.javaClass.getResourceAsStream("/version.properties"))
-        }.getProperty("version")
-    } catch (e: Exception) {
-        null
-    }
+    var name: String = NAME
+    var version: String = VERSION
     var upSince: Instant = Instant.now()
     var statusCount: Int = 0
     var uploadCount: Int = 0
@@ -86,8 +85,6 @@ val currentStatus = Status()
 val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
     Adapters.forEach { builder.add(it) }
 }.build().adapter(Counter::class.java)
-
-val version = BsonString(currentStatus.version)
 
 fun Application.intellijlogger() {
     install(XForwardedHeaderSupport)
@@ -121,7 +118,7 @@ fun Application.intellijlogger() {
 
                 val receivedCounters = upload.counters.map { counter ->
                     BsonDocument.parse(adapter.toJson(counter))
-                            .append("receivedVersion", version)
+                            .append("receivedVersion", BsonString(VERSION))
                             .append("receivedTime", receivedTime)
                             .append("receivedIP", receivedIP)
                             .append("receivedSemester", receivedSemester)
@@ -132,7 +129,7 @@ fun Application.intellijlogger() {
                 logger.debug { "${ receivedCounters.size } counters uploaded" }
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
-                logger.warn { "couldn't save counters: $e" }
+                logger.warn { "couldn't save upload: $e" }
                 call.respond(HttpStatusCode.InternalServerError)
                 currentStatus.failureCount++
                 return@post

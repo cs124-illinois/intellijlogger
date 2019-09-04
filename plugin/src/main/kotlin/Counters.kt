@@ -24,6 +24,7 @@ data class Counter(
         var email: String? = null,
         var sentIPAddress: String? = null,
         var version: String = "",
+        var intelliJVersion: String = "",
         var start: Long = Instant.now().toEpochMilli(),
         var end: Long = -1,
         var keystrokeCount: Int = 0,
@@ -50,8 +51,7 @@ data class Counter(
         var openFileCount: Int = 0,
         var selectedFile: String = "",
         var opened: Boolean = false,
-        var closed: Boolean = true,
-        var intelliJVersion: String
+        var closed: Boolean = true
 ) {
     fun totalCount(): Int {
         return keystrokeCount +

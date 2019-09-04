@@ -273,7 +273,7 @@ class Component :
                     projectConfigurations[project]?.email,
                     projectConfigurations[project]?.networkAddress,
                     version,
-                    intelliJVersion = intellijVersion
+                    intellijVersion
             )
             currentProjectCounters[project] = newCounter
             state.activeCounters.add(newCounter)
@@ -365,7 +365,7 @@ class Component :
                 projectConfiguration.email,
                 projectConfiguration.networkAddress,
                 version,
-                intelliJVersion = intellijVersion
+                intellijVersion
         )
         newCounter.opened = true
         currentProjectCounters[project] = newCounter
