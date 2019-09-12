@@ -11,7 +11,7 @@ plugins {
     id("com.palantir.docker") version "0.22.1"
 }
 dependencies {
-    val ktorVersion = "1.2.2"
+    val ktorVersion = "1.2.4"
 
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.8.0")
 
@@ -22,8 +22,8 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.8.0")
     implementation("com.ryanharter.ktor:ktor-moshi:1.0.1")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.uchuhimo:konf-core:0.17.0")
-    implementation("com.uchuhimo:konf-yaml:0.17.0")
+    implementation("com.uchuhimo:konf-core:0.19.0")
+    implementation("com.uchuhimo:konf-yaml:0.19.0")
     implementation("io.github.microutils:kotlin-logging:1.7.6")
 
     val kotlintestVersion = "3.4.1"

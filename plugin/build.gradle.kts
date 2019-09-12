@@ -12,8 +12,9 @@ plugins {
 }
 intellij {
     pluginName = "CS 125 IntelliJ Activity Logger"
-    version = "2019.1"
+    version = "2019.2"
     sandboxDirectory = File(projectDir, "sandbox").absolutePath
+    setPlugins("java")
 }
 tasks.patchPluginXml {
     sinceBuild(majorIntelliJVersion)
@@ -24,7 +25,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
     implementation("org.yaml:snakeyaml:1.25")
-    implementation("org.apache.httpcomponents:httpclient:4.5.9")
+    implementation("org.apache.httpcomponents:httpclient:4.5.10")
     implementation("com.squareup.moshi:moshi:1.8.0")
 }
 task("createProperties") {

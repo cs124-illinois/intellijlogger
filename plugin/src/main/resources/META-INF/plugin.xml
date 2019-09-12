@@ -7,6 +7,7 @@
     <description><![CDATA[ Records MP development for CS 125 @ Illinois. ]]></description>
 
     <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <typedHandler implementation="edu.illinois.cs.cs125.intellijlogger.Component$TypedHandler"/>

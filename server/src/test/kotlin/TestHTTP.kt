@@ -16,7 +16,6 @@ class TestHTTP : StringSpec({
                 addHeader("content-type", "application/json")
             }.apply {
                 response.shouldHaveStatus(HttpStatusCode.OK.value)
-                println(response.content.toString())
             }
         }
     }

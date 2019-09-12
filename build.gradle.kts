@@ -4,7 +4,7 @@ plugins {
     val kotlinVersion = "1.3.50"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("kapt") version kotlinVersion apply false
-    id("com.github.ben-manes.versions") version "0.24.0"
+    id("com.github.ben-manes.versions") version "0.25.0"
 }
 allprojects {
     repositories {
