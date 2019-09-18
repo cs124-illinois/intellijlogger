@@ -37,6 +37,8 @@ application {
 }
 docker {
     name = "cs125/intellijlogger"
+    tag("latest", "cs125/intellijlogger:latest")
+    tag(version.toString(), "cs125/intellijlogger:$version")
     files(tasks["shadowJar"].outputs)
 }
 tasks.test {
