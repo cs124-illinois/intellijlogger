@@ -79,6 +79,7 @@ class Status {
     var statusCount: Int = 0
     var uploadCount: Int = 0
     var failureCount: Int = 0
+    var lastUpload: Instant? = null
 }
 val currentStatus = Status()
 
@@ -126,6 +127,7 @@ fun Application.intellijlogger() {
                 }
                 mongoCollection.insertMany(receivedCounters)
                 currentStatus.uploadCount += receivedCounters.size
+                currentStatus.lastUpload = Instant.now()
 
                 logger.debug { "${ receivedCounters.size } counters uploaded" }
                 call.respond(HttpStatusCode.OK)
