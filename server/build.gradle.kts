@@ -1,7 +1,7 @@
 import java.util.*
 
 group = "edu.illinois.cs.cs125"
-version = "2019.9.3"
+version = "2019.9.3.1"
 
 plugins {
     kotlin("jvm")
@@ -22,8 +22,8 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.8.0")
     implementation("com.ryanharter.ktor:ktor-moshi:1.0.1")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.uchuhimo:konf-core:0.19.0")
-    implementation("com.uchuhimo:konf-yaml:0.19.0")
+    implementation("com.uchuhimo:konf-core:0.20.0")
+    implementation("com.uchuhimo:konf-yaml:0.20.0")
     implementation("io.github.microutils:kotlin-logging:1.7.6")
 
     val kotlintestVersion = "3.4.1"

@@ -90,6 +90,7 @@ fun Application.intellijlogger() {
     install(XForwardedHeaderSupport)
     install(CORS) {
         anyHost()
+        allowNonSimpleContentTypes = true
     }
     install(ContentNegotiation) {
         moshi {
