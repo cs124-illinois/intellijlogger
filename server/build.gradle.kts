@@ -43,8 +43,8 @@ docker {
 }
 tasks.test {
     useJUnitPlatform()
-    systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback-test.xml").absolutePath
-    environment("MONGO", "mongodb://localhost:27017/testing")
+    systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback.xml").absolutePath
+    environment("MONGODB", "mongodb://localhost:27048/testing")
 }
 tasks.jar {
     manifest {
