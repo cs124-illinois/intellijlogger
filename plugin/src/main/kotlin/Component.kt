@@ -47,11 +47,20 @@ import kotlin.concurrent.timer
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 
+const val NAME = "intellijplugin"
 val version: String = Properties().also {
-    it.load((object : Any() {}).javaClass.getResourceAsStream("/version.properties"))
+    it.load((object : Any() {}).javaClass.getResourceAsStream("/${NAME}_version.properties"))
 }.getProperty("version")
 val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 
+private const val STATE_TIMER_PERIOD_SEC = 5
+private const val MAX_SAVED_COUNTERS = (2 * 60 * 60 / STATE_TIMER_PERIOD_SEC) // 2 hours of logs
+private const val UPLOAD_LOG_COUNT_THRESHOLD = (15 * 60 / STATE_TIMER_PERIOD_SEC) // 15 minutes of logs
+private const val SHORTEST_UPLOAD_WAIT = 10 * 60 * 1000 // 10 minutes
+private const val SHORTEST_UPLOAD_INTERVAL = 30 * 60 * 1000 // 30 minutes
+private const val SECONDS_TO_MILLISECONDS = 1000L
+
+@Suppress("TooManyFunctions")
 class Component :
         BaseComponent,
         CaretListener,
@@ -141,7 +150,7 @@ class Component :
             return
         }
 
-        if (lastUploadFailed && Instant.now().toEpochMilli() - lastUploadAttempt <= shortestUploadWait) {
+        if (lastUploadFailed && Instant.now().toEpochMilli() - lastUploadAttempt <= SHORTEST_UPLOAD_WAIT) {
             log.trace("Need to wait for longer to retry upload")
             return
         }
@@ -213,7 +222,9 @@ class Component :
 
                 lastUploadFailed = try {
                     val response = httpClient.execute(counterPost)
-                    assert(response.statusLine.statusCode == HttpStatus.SC_OK) { "upload failed: ${ response.statusLine }" }
+                    assert(response.statusLine.statusCode == HttpStatus.SC_OK) {
+                        "upload failed: ${ response.statusLine }"
+                    }
 
                     state.savedCounters.subList(startIndex, endIndex).clear()
                     log.trace("Upload succeeded")
@@ -230,12 +241,6 @@ class Component :
         }
         ProgressManager.getInstance().run(uploadCounterTask)
     }
-
-    private val stateTimerPeriodSec = 5
-    private val maxSavedCounters = (2 * 60 * 60 / stateTimerPeriodSec) // 2 hours of logs
-    private val uploadLogCountThreshold = (15 * 60 / stateTimerPeriodSec) // 15 minutes of logs
-    private val shortestUploadWait = 10 * 60 * 1000 // 10 minutes
-    private val shortestUploadInterval = 30 * 60 * 1000 // 30 minutes
 
     @Synchronized
     fun rotateCounters() {
@@ -279,19 +284,20 @@ class Component :
             state.activeCounters.add(newCounter)
         }
 
-        if (state.savedCounters.size > maxSavedCounters) {
-            state.savedCounters.subList(0, maxSavedCounters - state.savedCounters.size).clear()
+        if (state.savedCounters.size > MAX_SAVED_COUNTERS) {
+            state.savedCounters.subList(0, MAX_SAVED_COUNTERS - state.savedCounters.size).clear()
         }
 
         val now = Instant.now().toEpochMilli()
-        if (state.savedCounters.size >= uploadLogCountThreshold) {
+        if (state.savedCounters.size >= UPLOAD_LOG_COUNT_THRESHOLD) {
             uploadCounters()
-        } else if (now - lastSuccessfulUpload > shortestUploadInterval) {
+        } else if (now - lastSuccessfulUpload > SHORTEST_UPLOAD_INTERVAL) {
             uploadCounters()
         }
     }
 
     private var stateTimer: Timer? = null
+    @Suppress("ComplexMethod", "LongMethod", "NestedBlockDepth")
     override fun projectOpened(project: Project) {
         log.trace("projectOpened")
 
@@ -322,6 +328,7 @@ class Component :
                 }
             }
 
+            @Suppress("MagicNumber")
             val networkAddress = try {
                 NetworkInterface.getNetworkInterfaces().toList().flatMap { networkInterface ->
                     networkInterface.inetAddresses.toList()
@@ -347,7 +354,15 @@ class Component :
                 false
             }
 
-            ProjectConfiguration(destination, name, emailLocation, email, networkAddress, buttonAction, trustSelfSignedCertificates)
+            ProjectConfiguration(
+                    destination,
+                    name,
+                    emailLocation,
+                    email,
+                    networkAddress,
+                    buttonAction,
+                    trustSelfSignedCertificates
+            )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
             return
@@ -373,8 +388,12 @@ class Component :
 
         if (currentProjectCounters.size == 1) {
             stateTimer?.cancel()
-            stateTimer = timer("edu.illinois.cs.cs125", true,
-                    stateTimerPeriodSec * 1000L, stateTimerPeriodSec * 1000L) {
+            stateTimer = timer(
+                    "edu.illinois.cs.cs125",
+                    true,
+                    STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS,
+                    STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS
+            ) {
                 rotateCounters()
             }
         }
@@ -406,7 +425,13 @@ class Component :
     }
 
     inner class TypedHandler : TypedHandlerDelegate() {
-        override fun beforeCharTyped(char: Char, project: Project, editor: Editor, file: PsiFile, fileType: FileType): Result {
+        override fun beforeCharTyped(
+                char: Char,
+                project: Project,
+                editor: Editor,
+                file: PsiFile,
+                fileType: FileType
+        ): Result {
             val projectCounter = currentProjectCounters[project] ?: return Result.CONTINUE
             log.trace("charTyped (${projectCounter.keystrokeCount})")
             projectCounter.keystrokeCount++
@@ -415,7 +440,9 @@ class Component :
     }
 
     inner class TestStatusHandler : TestStatusListener() {
-        override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?) {}
+        override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?) {
+            // Nothing to do here
+        }
         private fun countTests(abstractTestProxy: AbstractTestProxy, projectCounter: Counter) {
             if (!abstractTestProxy.isLeaf) {
                 for (child in abstractTestProxy.children) {
@@ -526,6 +553,7 @@ class Component :
                     log.debug("Updated email for project " + info.name + ": " + info.email)
                 }
             } catch (e: Throwable) {
+                // Ignore errors here so that we can proceed
             }
         }
 

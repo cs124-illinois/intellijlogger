@@ -10,12 +10,12 @@ class Persistence : PersistentStateComponent<Persistence.State> {
         var activeCounters = mutableListOf<Counter>()
         var savedCounters = mutableListOf<Counter>()
         var counterIndex = 0L
-        var UUID: String = ""
+        @Suppress("VariableNaming") var UUID: String = ""
         var lastSave: Long = -1
         val pluginVersion: String = version
     }
     var persistentState = State()
-    override fun getState() : State {
+    override fun getState(): State {
         persistentState.lastSave = Instant.now().toEpochMilli()
         return persistentState
     }

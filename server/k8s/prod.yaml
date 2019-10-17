@@ -15,14 +15,14 @@ spec:
     spec:
       containers:
       - name: intellijlogger
-        image: cs125/intellijlogger
+        image: cs125/intellijlogger:2019.10.1
         imagePullPolicy: Always
         ports:
         - containerPort: 8888
         env:
         - name: SEMESTER
           value: Fall2019
-        - name: MONGO
+        - name: MONGODB
           valueFrom:
             secretKeyRef:
               name: mongo

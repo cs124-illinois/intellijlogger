@@ -1,0 +1,27 @@
+version: "2"
+networks:
+  intellijlogger:
+    driver: bridge
+services:
+  intellijlogger:
+    image: "cs125/intellijlogger:latest"
+    depends_on:
+      - mongodb
+    ports:
+      - "8818:8888"
+    networks:
+      - intellijlogger
+    environment:
+      - "MONGODB=mongodb://mongodb/cs125"
+      - "SEMESTER=Fall2019"
+  mongodb:
+    image: "bitnami/mongodb:4.0"
+    ports:
+      - "27048:27017"
+    volumes:
+      - "mongodb_data:/bitnami"
+    networks:
+      - intellijlogger
+volumes:
+  mongodb_data:
+    driver: local

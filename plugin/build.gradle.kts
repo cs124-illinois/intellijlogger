@@ -2,7 +2,7 @@ import java.util.*
 
 val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
-version = "2019.9.3.$majorIntelliJVersion"
+version = "2019.10.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -33,7 +33,9 @@ task("createProperties") {
         val properties = Properties().also {
             it["version"] = project.version.toString()
         }
-        File(projectDir, "src/main/resources/version.properties").printWriter().use { properties.store(it, null) }
+        File(projectDir, "src/main/resources/intellijplugin_version.properties").printWriter().use {
+            properties.store(it, null)
+        }
     }
 }
 tasks.processResources {

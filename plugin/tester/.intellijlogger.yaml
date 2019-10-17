@@ -1,4 +1,4 @@
-destination: https://cs125-cloud.cs.illinois.edu/intellijlogger/
+destination: http://localhost:8818/
 name: "intellijlogger:tester"
 emailLocation: email.txt
 buttonAction: "Grade.*"

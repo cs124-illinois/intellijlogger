@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package edu.illinois.cs.cs125.intellijlogger.moshi
 
 import com.squareup.moshi.FromJson
@@ -9,6 +11,7 @@ import java.time.Instant
 val Adapters = setOf(InstantAdapter())
 
 @Suppress("unused")
+
 class InstantAdapter {
     @FromJson
     fun instantFromJson(timestamp: String): Instant {

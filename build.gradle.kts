@@ -4,7 +4,8 @@ plugins {
     val kotlinVersion = "1.3.50"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("kapt") version kotlinVersion apply false
-    id("com.github.ben-manes.versions") version "0.26.0"
+    id("com.github.ben-manes.versions") version "0.27.0"
+    id("io.gitlab.arturbosch.detekt") version "1.1.1"
 }
 allprojects {
     repositories {
@@ -37,4 +38,9 @@ tasks.dependencyUpdates {
             }
         }
     }
+}
+detekt {
+    toolVersion = "1.1.1"
+    input = files("plugin/src/main/kotlin", "server/src/main/kotlin")
+    config = files("config/detekt/detekt.yml")
 }

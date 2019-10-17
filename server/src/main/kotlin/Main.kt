@@ -4,11 +4,12 @@ import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
 import com.mongodb.client.MongoCollection
 import com.ryanharter.ktor.moshi.moshi
-import com.squareup.moshi.*
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.json.toJson
-import com.uchuhimo.konf.source.yaml
 import edu.illinois.cs.cs125.intellijlogger.Counter
 import edu.illinois.cs.cs125.intellijlogger.Counters
 import edu.illinois.cs.cs125.intellijlogger.moshi.Adapters
@@ -32,7 +33,6 @@ import mu.KotlinLogging
 import org.bson.BsonDateTime
 import org.bson.BsonDocument
 import org.bson.BsonString
-import java.io.File
 import java.net.URI
 import java.time.Instant
 import java.util.*
@@ -40,30 +40,24 @@ import java.util.*
 @Suppress("UNUSED")
 private val logger = KotlinLogging.logger {}
 
-val VERSION: String = Properties().also {
-    it.load((object : Any() {}).javaClass.getResourceAsStream("/version.properties"))
-}.getProperty("version")
-
 const val NAME = "intellijlogger"
 const val DEFAULT_HTTP = "http://0.0.0.0:8888"
+val VERSION: String = Properties().also {
+    it.load((object : Any() {}).javaClass.getResourceAsStream("/${NAME}_version.properties"))
+}.getProperty("version")
 
 object TopLevel : ConfigSpec("") {
     val http by optional(DEFAULT_HTTP)
     val semester by optional<String?>(null)
-    val mongo by required<String>()
+    val mongodb by required<String>()
     val mongoCollection by optional(NAME)
 }
 
 val configuration = Config {
     addSpec(TopLevel)
-}.let {
-    if (File("config.yaml").exists() && File("config.yaml").length() > 0) {
-        it.from.yaml.file("config.yaml")
-    }
-    it.from.env()
-}
+}.from.env()
 
-val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mongo].run {
+val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mongodb].run {
     val uri = MongoClientURI(this)
     val database = uri.database ?: assert { "MONGO must specify database to use" }
     val collection = configuration[TopLevel.mongoCollection]
@@ -150,7 +144,7 @@ fun main() {
     val uri = URI(configuration[TopLevel.http])
     assert(uri.scheme == "http")
 
-    embeddedServer(Netty, host=uri.host, port=uri.port, module=Application::intellijlogger).start(wait = true)
+    embeddedServer(Netty, host = uri.host, port = uri.port, module = Application::intellijlogger).start(wait = true)
 }
 
 @Suppress("unused")
