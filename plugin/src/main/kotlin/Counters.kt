@@ -16,6 +16,7 @@ data class Counters(val counters: List<Counter>) {
 }
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
+@JsonClass(generateAdapter = true)
 data class Counter(
         @Suppress("ConstructorParameterNaming") var UUID: String = "",
         var index: Long = 0,
@@ -77,5 +78,7 @@ data class Counter(
         return totalCount() == 0
     }
 }
+@JsonClass(generateAdapter = true)
 data class TestCounter(var passed: Int = 0, var failed: Int = 0, var ignored: Int = 0, var interrupted: Int = 0)
+@JsonClass(generateAdapter = true)
 data class FileInfo(var path: String = "", var lineCount: Int = 0)

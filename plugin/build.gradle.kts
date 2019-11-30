@@ -8,7 +8,7 @@ plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.4.10"
+    id("org.jetbrains.intellij") version "0.4.14"
 }
 intellij {
     pluginName = "CS 125 IntelliJ Activity Logger"
@@ -21,12 +21,12 @@ tasks.patchPluginXml {
     untilBuild("193.*")
 }
 dependencies {
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.8.0")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.9.2")
 
     implementation(kotlin("stdlib"))
     implementation("org.yaml:snakeyaml:1.25")
     implementation("org.apache.httpcomponents:httpclient:4.5.10")
-    implementation("com.squareup.moshi:moshi:1.8.0")
+    implementation("com.squareup.moshi:moshi:1.9.2")
 }
 task("createProperties") {
     doLast {
