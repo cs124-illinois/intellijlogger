@@ -1,8 +1,8 @@
 import java.util.*
 
-val majorIntelliJVersion = "191"
+val majorIntelliJVersion = "193"
 group = "edu.illinois.cs.cs125"
-version = "2019.10.1.$majorIntelliJVersion"
+version = "2019.12.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -12,7 +12,7 @@ plugins {
 }
 intellij {
     pluginName = "CS 125 IntelliJ Activity Logger"
-    version = "2019.2"
+    version = "2019.3"
     sandboxDirectory = File(projectDir, "sandbox").absolutePath
     setPlugins("java")
 }
