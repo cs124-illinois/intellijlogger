@@ -1,8 +1,8 @@
 package edu.illinois.cs.cs125.intellijlogger
 
-import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.execution.testframework.TestStatusListener
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.compiler.CompilationStatusListener
@@ -10,14 +10,13 @@ import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerTopics
 import com.intellij.openapi.components.BaseComponent
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.*
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
-import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -26,7 +25,6 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.psi.PsiFile
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.conn.ssl.NoopHostnameVerifier
@@ -70,7 +68,8 @@ class Component :
         DocumentListener,
         ProjectManagerListener,
         CompilationStatusListener,
-        FileEditorManagerListener {
+        FileEditorManagerListener,
+        Disposable {
 
     @NotNull
     override fun getComponentName(): String {
@@ -123,12 +122,20 @@ class Component :
         state.activeCounters.clear()
 
         ApplicationManager.getApplication().invokeLater {
-            EditorFactory.getInstance().eventMulticaster.addCaretListener(this)
-            EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this)
-            EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this)
-            EditorFactory.getInstance().eventMulticaster.addSelectionListener(this)
-            EditorFactory.getInstance().eventMulticaster.addDocumentListener(this)
+            EditorFactory.getInstance().eventMulticaster.addCaretListener(this, this)
+            EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
+            EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, this)
+            EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, this)
+            EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, this)
         }
+    }
+
+    override fun dispose() {
+        EditorFactory.getInstance().eventMulticaster.removeCaretListener(this)
+        EditorFactory.getInstance().eventMulticaster.removeVisibleAreaListener(this)
+        EditorFactory.getInstance().eventMulticaster.removeEditorMouseListener(this)
+        EditorFactory.getInstance().eventMulticaster.removeSelectionListener(this)
+        EditorFactory.getInstance().eventMulticaster.removeDocumentListener(this)
     }
 
     var uploadBusy = false
@@ -422,21 +429,6 @@ class Component :
         lastSuccessfulUpload = 0
         uploadCounters()
         return
-    }
-
-    inner class TypedHandler : TypedHandlerDelegate() {
-        override fun beforeCharTyped(
-                char: Char,
-                project: Project,
-                editor: Editor,
-                file: PsiFile,
-                fileType: FileType
-        ): Result {
-            val projectCounter = currentProjectCounters[project] ?: return Result.CONTINUE
-            log.trace("charTyped (${projectCounter.keystrokeCount})")
-            projectCounter.keystrokeCount++
-            return Result.CONTINUE
-        }
     }
 
     inner class TestStatusHandler : TestStatusListener() {

@@ -6,10 +6,11 @@ import com.intellij.execution.RunnerAndConfigurationSettings
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 
 fun Project.getButtonAction(): RunnerAndConfigurationSettings? {
-    val projectConfiguration = this.getComponent(Component::class.java).projectConfigurations[this] ?: run {
+    val projectConfiguration = ApplicationManager.getApplication().getComponent(Component::class.java).projectConfigurations[this] ?: run {
         log.trace("no configuration for project")
         return null
     }
@@ -34,7 +35,7 @@ class ButtonAction : AnAction() {
             return
         }
         val buttonAction = project.getButtonAction() ?: return
-        val counters = project.getComponent(Component::class.java).currentProjectCounters[project] ?: run {
+        val counters = ApplicationManager.getApplication().getComponent(Component::class.java).currentProjectCounters[project] ?: run {
             log.warn("can't get counters for project")
             return
         }
