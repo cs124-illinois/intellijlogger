@@ -123,7 +123,7 @@ fun Application.intellijlogger() {
                 currentStatus.uploadCount += receivedCounters.size
                 currentStatus.lastUpload = Instant.now()
 
-                logger.debug { "${ receivedCounters.size } counters uploaded" }
+                logger.debug { "${ receivedCounters.size } counters uploaded (${ upload.counters.first().index }..${ upload.counters.last().index })" }
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 logger.warn { "couldn't save upload: $e" }

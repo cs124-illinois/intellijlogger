@@ -11,7 +11,6 @@ import com.intellij.openapi.compiler.CompilerTopics
 import com.intellij.openapi.components.BaseComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.*
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -53,9 +52,9 @@ val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 
 private const val STATE_TIMER_PERIOD_SEC = 5
 private const val MAX_SAVED_COUNTERS = (2 * 60 * 60 / STATE_TIMER_PERIOD_SEC) // 2 hours of logs
-private const val UPLOAD_LOG_COUNT_THRESHOLD = (15 * 60 / STATE_TIMER_PERIOD_SEC) // 15 minutes of logs
-private const val SHORTEST_UPLOAD_WAIT = 10 * 60 * 1000 // 10 minutes
-private const val SHORTEST_UPLOAD_INTERVAL = 30 * 60 * 1000 // 30 minutes
+private const val UPLOAD_LOG_COUNT_THRESHOLD = (5 * 60 / STATE_TIMER_PERIOD_SEC) // 5 minutes of logs
+private const val SHORTEST_UPLOAD_WAIT = 5 * 60 * 1000 // 5 minutes
+private const val SHORTEST_UPLOAD_INTERVAL = 10 * 60 * 1000 // 10 minutes
 private const val SECONDS_TO_MILLISECONDS = 1000L
 
 @Suppress("TooManyFunctions")
@@ -227,6 +226,8 @@ class Component :
                 counterPost.addHeader("content-type", "application/json")
                 counterPost.entity = StringEntity(json)
 
+                log.trace("Uploading $startIndex..$endIndex")
+
                 lastUploadFailed = try {
                     val response = httpClient.execute(counterPost)
                     assert(response.statusLine.statusCode == HttpStatus.SC_OK) {
@@ -234,6 +235,7 @@ class Component :
                     }
 
                     state.savedCounters.subList(startIndex, endIndex).clear()
+
                     log.trace("Upload succeeded")
                     lastSuccessfulUpload = now
                     false
