@@ -53,6 +53,7 @@ val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 private const val STATE_TIMER_PERIOD_SEC = 5
 private const val MAX_SAVED_COUNTERS = (2 * 60 * 60 / STATE_TIMER_PERIOD_SEC) // 2 hours of logs
 private const val UPLOAD_LOG_COUNT_THRESHOLD = (5 * 60 / STATE_TIMER_PERIOD_SEC) // 5 minutes of logs
+private const val EMPTY_LOG_COUNT_THRESHOLD = (5 * 60 / STATE_TIMER_PERIOD_SEC) // 5 minutes of inactivity
 private const val SHORTEST_UPLOAD_WAIT = 5 * 60 * 1000 // 5 minutes
 private const val SHORTEST_UPLOAD_INTERVAL = 10 * 60 * 1000 // 10 minutes
 private const val SECONDS_TO_MILLISECONDS = 1000L
@@ -251,6 +252,7 @@ class Component :
         ProgressManager.getInstance().run(uploadCounterTask)
     }
 
+    private var emptyIntervals = 0
     @Synchronized
     fun rotateCounters() {
         log.trace("rotateCounters")
@@ -258,28 +260,32 @@ class Component :
         val state = Persistence.getInstance().persistentState
         val end = Instant.now().toEpochMilli()
 
-        for ((project, counter) in currentProjectCounters) {
-            if (counter.isEmpty()) {
-                continue
-            }
-            counter.end = end
+        if (currentProjectCounters.values.none { !it.isEmpty() }) {
+            emptyIntervals++
+        } else {
+            emptyIntervals = 0
+            for ((project, counter) in currentProjectCounters) {
+                if (counter.isEmpty()) {
+                    continue
+                }
+                counter.end = end
 
-            val fileDocumentManager = FileDocumentManager.getInstance()
-            val openFiles: MutableMap<String, FileInfo> = mutableMapOf()
-            for (file in FileEditorManager.getInstance(project).openFiles.filterNotNull()) {
-                val document = fileDocumentManager.getCachedDocument(file) ?: continue
-                openFiles[file.path] = FileInfo(file.path, document.lineCount)
-            }
-            counter.openFiles = openFiles.values.toMutableList()
-            counter.openFileCount = counter.openFiles.size
-            counter.closed = false
+                val fileDocumentManager = FileDocumentManager.getInstance()
+                val openFiles: MutableMap<String, FileInfo> = mutableMapOf()
+                for (file in FileEditorManager.getInstance(project).openFiles.filterNotNull()) {
+                    val document = fileDocumentManager.getCachedDocument(file) ?: continue
+                    openFiles[file.path] = FileInfo(file.path, document.lineCount)
+                }
+                counter.openFiles = openFiles.values.toMutableList()
+                counter.openFileCount = counter.openFiles.size
+                counter.closed = false
 
-            log.trace("Counter $counter")
+                log.trace("Counter $counter")
 
-            state.savedCounters.add(counter)
-            state.activeCounters.remove(counter)
+                state.savedCounters.add(counter)
+                state.activeCounters.remove(counter)
 
-            val newCounter = Counter(
+                val newCounter = Counter(
                     state.UUID,
                     state.counterIndex++,
                     counter.index,
@@ -288,9 +294,10 @@ class Component :
                     projectConfigurations[project]?.networkAddress,
                     version,
                     intellijVersion
-            )
-            currentProjectCounters[project] = newCounter
-            state.activeCounters.add(newCounter)
+                )
+                currentProjectCounters[project] = newCounter
+                state.activeCounters.add(newCounter)
+            }
         }
 
         if (state.savedCounters.size > MAX_SAVED_COUNTERS) {
@@ -299,8 +306,13 @@ class Component :
 
         val now = Instant.now().toEpochMilli()
         if (state.savedCounters.size >= UPLOAD_LOG_COUNT_THRESHOLD) {
+            log.trace("Log storage interval exceeded")
             uploadCounters()
         } else if (now - lastSuccessfulUpload > SHORTEST_UPLOAD_INTERVAL) {
+            log.trace("Upload interval exceeded")
+            uploadCounters()
+        } else if (emptyIntervals > EMPTY_LOG_COUNT_THRESHOLD && state.savedCounters.size > 0) {
+            log.trace("Quiescent interval exceeded")
             uploadCounters()
         }
     }
