@@ -64,7 +64,7 @@ val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 private const val STATE_TIMER_PERIOD_SEC = 5
 private const val MAX_SAVED_COUNTERS = (2 * 60 * 60 / STATE_TIMER_PERIOD_SEC) // 2 hours of logs
 private const val UPLOAD_LOG_COUNT_THRESHOLD = (5 * 60 / STATE_TIMER_PERIOD_SEC) // 5 minutes of logs
-private const val EMPTY_LOG_COUNT_THRESHOLD = (5 * 60 / STATE_TIMER_PERIOD_SEC) // 5 minutes of inactivity
+private const val EMPTY_LOG_COUNT_THRESHOLD = (2 * 60 / STATE_TIMER_PERIOD_SEC) // 2 minutes of inactivity
 private const val SHORTEST_UPLOAD_WAIT = 5 * 60 * 1000 // 5 minutes
 private const val SHORTEST_UPLOAD_INTERVAL = 10 * 60 * 1000 // 10 minutes
 private const val SECONDS_TO_MILLISECONDS = 1000L
@@ -96,7 +96,8 @@ class Component :
         var email: String?,
         val networkAddress: String?,
         val buttonAction: String?,
-        val trustSelfSignedCertificates: Boolean
+        val trustSelfSignedCertificates: Boolean,
+        val saveOnClose: Boolean
     )
 
     var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
@@ -154,7 +155,7 @@ class Component :
     var lastUploadAttempt: Long = 0
     var lastSuccessfulUpload: Long = 0
 
-    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    @Suppress("ReturnCount", "TooGenericExceptionCaught", "ComplexMethod")
     @Synchronized
     fun uploadCounters() {
         log.trace("uploadCounters")
@@ -243,7 +244,9 @@ class Component :
                 counterPost.addHeader("content-type", "application/json")
                 counterPost.entity = StringEntity(json)
 
-                log.trace("Uploading $startIndex..$endIndex")
+                log.trace(
+                    "Uploading ${state.savedCounters[startIndex].index}..${state.savedCounters[endIndex - 1].index}"
+                )
 
                 lastUploadFailed = try {
                     val response = httpClient.execute(counterPost)
@@ -255,6 +258,7 @@ class Component :
 
                     log.trace("Upload succeeded")
                     lastSuccessfulUpload = now
+
                     false
                 } catch (e: Throwable) {
                     log.warn("Upload failed: $e")
@@ -277,6 +281,7 @@ class Component :
         val end = Instant.now().toEpochMilli()
 
         if (currentProjectCounters.values.none { !it.isEmpty() }) {
+            log.trace("$emptyIntervals empty intervals")
             emptyIntervals++
         } else {
             emptyIntervals = 0
@@ -391,6 +396,13 @@ class Component :
                 false
             }
 
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            val saveOnClose = try {
+                configuration["saveOnClose"] as Boolean
+            } catch (e: Exception) {
+                true
+            }
+
             ProjectConfiguration(
                 destination,
                 name,
@@ -398,7 +410,8 @@ class Component :
                 email,
                 networkAddress,
                 buttonAction,
-                trustSelfSignedCertificates
+                trustSelfSignedCertificates,
+                saveOnClose
             )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
@@ -456,9 +469,11 @@ class Component :
         if (currentProjectCounters.isEmpty()) {
             stateTimer?.cancel()
         }
-        // Force an immediate upload
-        lastSuccessfulUpload = 0
-        uploadCounters()
+        if (projectConfigurations[project]?.saveOnClose == true) {
+            // Force an immediate upload
+            lastSuccessfulUpload = 0
+            uploadCounters()
+        }
         return
     }
 

@@ -9,18 +9,19 @@ import java.time.Instant
 @Suppress("unused")
 @State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.xml"))])
 class Persistence : PersistentStateComponent<Persistence.State> {
-    class State {
-        var activeCounters = mutableListOf<Counter>()
-        var savedCounters = mutableListOf<Counter>()
-        var counterIndex = 0L
-        @Suppress("VariableNaming", "PropertyName")
-        var UUID: String = ""
-        var lastSave: Long = -1
+    data class State(
+        var activeCounters: MutableList<Counter> = mutableListOf(),
+        var savedCounters: MutableList<Counter> = mutableListOf(),
+        var counterIndex: Long = 0L,
+        @Suppress("ConstructorParameterNaming")
+        var UUID: String = "",
+        var lastSave: Long = -1,
         val pluginVersion: String = version
-    }
+    )
 
     var persistentState = State()
     override fun getState(): State {
+        log.trace("Saving state")
         persistentState.lastSave = Instant.now().toEpochMilli()
         return persistentState
     }

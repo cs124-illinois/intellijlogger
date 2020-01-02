@@ -2,7 +2,7 @@ import java.util.*
 
 val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
-version = "2019.12.1.$majorIntelliJVersion"
+version = "2020.1.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
