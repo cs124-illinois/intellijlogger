@@ -10,10 +10,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 
 fun Project.getButtonAction(): RunnerAndConfigurationSettings? {
-    val projectConfiguration = ApplicationManager.getApplication().getComponent(Component::class.java).projectConfigurations[this] ?: run {
-        log.trace("no configuration for project")
-        return null
-    }
+    val projectConfiguration =
+        ApplicationManager.getApplication().getComponent(Component::class.java).projectConfigurations[this] ?: run {
+            log.trace("no configuration for project")
+            return null
+        }
     val pattern = projectConfiguration.buttonAction ?: run {
         log.trace("no buttonAction for project")
         return null
@@ -26,6 +27,7 @@ fun Project.getButtonAction(): RunnerAndConfigurationSettings? {
         return null
     }
 }
+
 class ButtonAction : AnAction() {
 
     override fun actionPerformed(anActionEvent: AnActionEvent) {
@@ -35,10 +37,12 @@ class ButtonAction : AnAction() {
             return
         }
         val buttonAction = project.getButtonAction() ?: return
-        val counters = ApplicationManager.getApplication().getComponent(Component::class.java).currentProjectCounters[project] ?: run {
-            log.warn("can't get counters for project")
-            return
-        }
+        val counters =
+            ApplicationManager.getApplication().getComponent(Component::class.java).currentProjectCounters[project]
+                ?: run {
+                    log.warn("can't get counters for project")
+                    return
+                }
 
         ProgramRunnerUtil.executeConfiguration(buttonAction, DefaultRunExecutor.getRunExecutorInstance())
         counters.gradingCount++

@@ -9,6 +9,7 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("com.palantir.docker") version "0.22.1"
+    id("org.jmailen.kotlinter")
 }
 dependencies {
     val ktorVersion = "1.2.6"

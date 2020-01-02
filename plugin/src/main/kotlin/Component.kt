@@ -11,7 +11,16 @@ import com.intellij.openapi.compiler.CompilerTopics
 import com.intellij.openapi.components.BaseComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.event.*
+import com.intellij.openapi.editor.event.CaretEvent
+import com.intellij.openapi.editor.event.CaretListener
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.event.EditorMouseEvent
+import com.intellij.openapi.editor.event.EditorMouseListener
+import com.intellij.openapi.editor.event.SelectionEvent
+import com.intellij.openapi.editor.event.SelectionListener
+import com.intellij.openapi.editor.event.VisibleAreaEvent
+import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
@@ -24,6 +33,14 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
+import java.io.File
+import java.net.NetworkInterface
+import java.nio.file.Files
+import java.time.Instant
+import java.util.Properties
+import java.util.Timer
+import java.util.UUID
+import kotlin.concurrent.timer
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.conn.ssl.NoopHostnameVerifier
@@ -35,18 +52,12 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
 import org.jetbrains.annotations.NotNull
 import org.yaml.snakeyaml.Yaml
-import java.io.File
-import java.net.NetworkInterface
-import java.nio.file.Files
-import java.time.Instant
-import java.util.*
-import kotlin.concurrent.timer
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 
 const val NAME = "intellijplugin"
 val version: String = Properties().also {
-    it.load((object : Any() {}).javaClass.getResourceAsStream("/${NAME}_version.properties"))
+    it.load((object {}).javaClass.getResourceAsStream("/${NAME}_version.properties"))
 }.getProperty("version")
 val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 
@@ -60,16 +71,16 @@ private const val SECONDS_TO_MILLISECONDS = 1000L
 
 @Suppress("TooManyFunctions")
 class Component :
-        BaseComponent,
-        CaretListener,
-        VisibleAreaListener,
-        EditorMouseListener,
-        SelectionListener,
-        DocumentListener,
-        ProjectManagerListener,
-        CompilationStatusListener,
-        FileEditorManagerListener,
-        Disposable {
+    BaseComponent,
+    CaretListener,
+    VisibleAreaListener,
+    EditorMouseListener,
+    SelectionListener,
+    DocumentListener,
+    ProjectManagerListener,
+    CompilationStatusListener,
+    FileEditorManagerListener,
+    Disposable {
 
     @NotNull
     override fun getComponentName(): String {
@@ -79,13 +90,13 @@ class Component :
     var currentProjectCounters = mutableMapOf<Project, Counter>()
 
     data class ProjectConfiguration(
-            val destination: String,
-            val name: String,
-            val emailLocation: String?,
-            var email: String?,
-            val networkAddress: String?,
-            val buttonAction: String?,
-            val trustSelfSignedCertificates: Boolean
+        val destination: String,
+        val name: String,
+        val emailLocation: String?,
+        var email: String?,
+        val networkAddress: String?,
+        val buttonAction: String?,
+        val trustSelfSignedCertificates: Boolean
     )
 
     var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
@@ -143,6 +154,7 @@ class Component :
     var lastUploadAttempt: Long = 0
     var lastSuccessfulUpload: Long = 0
 
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
     @Synchronized
     fun uploadCounters() {
         log.trace("uploadCounters")
@@ -187,8 +199,10 @@ class Component :
             return
         }
 
-        val uploadCounterTask = object : Task.Backgroundable(project, "Uploading CS 125 logs...",
-                false) {
+        val uploadCounterTask = object : Task.Backgroundable(
+            project, "Uploading CS 125 logs...",
+            false
+        ) {
             override fun run(progressIndicator: ProgressIndicator) {
                 val now = Instant.now().toEpochMilli()
 
@@ -216,10 +230,12 @@ class Component :
                 }
 
                 val httpClient = if (projectConfiguration.trustSelfSignedCertificates) {
-                    HttpClients.custom().setSSLSocketFactory(SSLConnectionSocketFactory(
+                    HttpClients.custom().setSSLSocketFactory(
+                        SSLConnectionSocketFactory(
                             SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy()).build(),
                             NoopHostnameVerifier()
-                    )).build()
+                        )
+                    ).build()
                 } else {
                     HttpClientBuilder.create().build()
                 }
@@ -232,7 +248,7 @@ class Component :
                 lastUploadFailed = try {
                     val response = httpClient.execute(counterPost)
                     assert(response.statusLine.statusCode == HttpStatus.SC_OK) {
-                        "upload failed: ${ response.statusLine }"
+                        "upload failed: ${response.statusLine}"
                     }
 
                     state.savedCounters.subList(startIndex, endIndex).clear()
@@ -318,7 +334,7 @@ class Component :
     }
 
     private var stateTimer: Timer? = null
-    @Suppress("ComplexMethod", "LongMethod", "NestedBlockDepth")
+    @Suppress("ComplexMethod", "LongMethod", "NestedBlockDepth", "TooGenericExceptionCaught")
     override fun projectOpened(project: Project) {
         log.trace("projectOpened")
 
@@ -333,7 +349,7 @@ class Component :
             val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
 
             val destination = configuration["destination"]
-                    ?: throw IllegalArgumentException("destination missing from configuration")
+                ?: throw IllegalArgumentException("destination missing from configuration")
             val name = configuration["name"] ?: throw IllegalArgumentException("name missing from configuration")
 
             val emailLocation = configuration["emailLocation"]
@@ -353,10 +369,10 @@ class Component :
             val networkAddress = try {
                 NetworkInterface.getNetworkInterfaces().toList().flatMap { networkInterface ->
                     networkInterface.inetAddresses.toList()
-                            .filter { it.address.size == 4 }
-                            .filter { !it.isLoopbackAddress }
-                            .filter { it.address[0] != 10.toByte() }
-                            .map { it.hostAddress }
+                        .filter { it.address.size == 4 }
+                        .filter { !it.isLoopbackAddress }
+                        .filter { it.address[0] != 10.toByte() }
+                        .map { it.hostAddress }
                 }.first()
             } catch (e: Exception) {
                 null
@@ -376,13 +392,13 @@ class Component :
             }
 
             ProjectConfiguration(
-                    destination,
-                    name,
-                    emailLocation,
-                    email,
-                    networkAddress,
-                    buttonAction,
-                    trustSelfSignedCertificates
+                destination,
+                name,
+                emailLocation,
+                email,
+                networkAddress,
+                buttonAction,
+                trustSelfSignedCertificates
             )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
@@ -394,14 +410,15 @@ class Component :
 
         val state = Persistence.getInstance().persistentState
 
-        val newCounter = Counter(state.UUID,
-                state.counterIndex++,
-                -1,
-                projectConfiguration.name,
-                projectConfiguration.email,
-                projectConfiguration.networkAddress,
-                version,
-                intellijVersion
+        val newCounter = Counter(
+            state.UUID,
+            state.counterIndex++,
+            -1,
+            projectConfiguration.name,
+            projectConfiguration.email,
+            projectConfiguration.networkAddress,
+            version,
+            intellijVersion
         )
         newCounter.opened = true
         currentProjectCounters[project] = newCounter
@@ -410,10 +427,10 @@ class Component :
         if (currentProjectCounters.size == 1) {
             stateTimer?.cancel()
             stateTimer = timer(
-                    "edu.illinois.cs.cs125",
-                    true,
-                    STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS,
-                    STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS
+                "edu.illinois.cs.cs125",
+                true,
+                STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS,
+                STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS
             ) {
                 rotateCounters()
             }
@@ -449,6 +466,7 @@ class Component :
         override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?) {
             // Nothing to do here
         }
+
         private fun countTests(abstractTestProxy: AbstractTestProxy, projectCounter: Counter) {
             if (!abstractTestProxy.isLeaf) {
                 for (child in abstractTestProxy.children) {
@@ -457,8 +475,8 @@ class Component :
                 return
             }
             val name = abstractTestProxy.name
-                    .replace("\\.test$".toRegex(), "")
-                    .replace(".", "_")
+                .replace("\\.test$".toRegex(), "")
+                .replace(".", "_")
             if (!(projectCounter.testCounts.containsKey(name))) {
                 projectCounter.testCounts[name] = TestCounter()
             }
@@ -544,6 +562,7 @@ class Component :
         projectCounter.selectionChangedCount++
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override fun documentChanged(documentEvent: DocumentEvent) {
         log.trace("documentChanged")
 
