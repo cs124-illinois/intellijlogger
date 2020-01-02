@@ -18,12 +18,12 @@ dependencies {
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("org.mongodb:mongodb-driver:3.11.2")
+    implementation("org.mongodb:mongodb-driver:3.12.0")
     implementation("com.squareup.moshi:moshi:1.9.2")
     implementation("com.ryanharter.ktor:ktor-moshi:1.0.1")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.uchuhimo:konf-core:0.21.0")
-    implementation("com.uchuhimo:konf-yaml:0.21.0")
+    implementation("com.uchuhimo:konf-core:0.22.1")
+    implementation("com.uchuhimo:konf-yaml:0.22.1")
     implementation("io.github.microutils:kotlin-logging:1.7.8")
 
     val kotlintestVersion = "3.4.2"

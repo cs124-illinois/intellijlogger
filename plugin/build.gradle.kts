@@ -8,7 +8,7 @@ plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.4.14"
+    id("org.jetbrains.intellij") version "0.4.15"
 }
 intellij {
     pluginName = "CS 125 IntelliJ Activity Logger"
