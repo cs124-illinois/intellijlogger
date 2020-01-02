@@ -29,13 +29,13 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import java.net.URI
+import java.time.Instant
+import java.util.Properties
 import mu.KotlinLogging
 import org.bson.BsonDateTime
 import org.bson.BsonDocument
 import org.bson.BsonString
-import java.net.URI
-import java.time.Instant
-import java.util.*
 
 @Suppress("UNUSED")
 private val logger = KotlinLogging.logger {}
@@ -75,6 +75,7 @@ class Status {
     var failureCount: Int = 0
     var lastUpload: Instant? = null
 }
+
 val currentStatus = Status()
 
 val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
@@ -114,16 +115,18 @@ fun Application.intellijlogger() {
 
                 val receivedCounters = upload.counters.map { counter ->
                     BsonDocument.parse(adapter.toJson(counter))
-                            .append("receivedVersion", BsonString(VERSION))
-                            .append("receivedTime", receivedTime)
-                            .append("receivedIP", receivedIP)
-                            .append("receivedSemester", receivedSemester)
+                        .append("receivedVersion", BsonString(VERSION))
+                        .append("receivedTime", receivedTime)
+                        .append("receivedIP", receivedIP)
+                        .append("receivedSemester", receivedSemester)
                 }
                 mongoCollection.insertMany(receivedCounters)
                 currentStatus.uploadCount += receivedCounters.size
                 currentStatus.lastUpload = Instant.now()
 
-                logger.debug { "${ receivedCounters.size } counters uploaded (${ upload.counters.first().index }..${ upload.counters.last().index })" }
+                logger.debug {
+                    "${receivedCounters.size} counters uploaded (${upload.counters.first().index}..${upload.counters.last().index})"
+                }
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 logger.warn { "couldn't save upload: $e" }
@@ -134,7 +137,9 @@ fun Application.intellijlogger() {
         }
     }
     intercept(ApplicationCallPipeline.Fallback) {
-        if (call.response.status() == null) { call.respond(HttpStatusCode.NotFound) }
+        if (call.response.status() == null) {
+            call.respond(HttpStatusCode.NotFound)
+        }
     }
 }
 
@@ -148,8 +153,16 @@ fun main() {
 }
 
 @Suppress("unused")
-fun assert(block: () -> String): Nothing { throw AssertionError(block()) }
+fun assert(block: () -> String): Nothing {
+    throw AssertionError(block())
+}
+
 @Suppress("unused")
-fun check(block: () -> String): Nothing { throw IllegalStateException(block()) }
+fun check(block: () -> String): Nothing {
+    throw IllegalStateException(block())
+}
+
 @Suppress("unused")
-fun require(block: () -> String): Nothing { throw IllegalArgumentException(block()) }
+fun require(block: () -> String): Nothing {
+    throw IllegalArgumentException(block())
+}
