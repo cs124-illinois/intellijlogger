@@ -1,4 +1,6 @@
-import java.util.*
+import java.util.Properties
+import java.io.StringWriter
+import java.io.File
 
 val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
@@ -34,9 +36,16 @@ task("createProperties") {
         val properties = Properties().also {
             it["version"] = project.version.toString()
         }
-        File(projectDir, "src/main/resources/intellijplugin_version.properties").printWriter().use {
-            properties.store(it, null)
-        }
+        File(
+            projectDir,
+            "src/main/resources/edu.illinois.cs.cs125.intellijlogger.version"
+        )
+            .printWriter().use { printWriter ->
+                printWriter.print(
+                    StringWriter().also { properties.store(it, null) }.buffer.toString()
+                        .lines().drop(1).joinToString(separator = "\n").trim()
+                )
+            }
     }
 }
 tasks.processResources {
