@@ -3,14 +3,14 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2020.1.1"
+version = "2020.1.2"
 
 plugins {
     kotlin("jvm")
     kotlin("kapt")
     application
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("com.palantir.docker") version "0.22.1"
+    id("com.palantir.docker") version "0.22.2"
     id("org.jmailen.kotlinter")
 }
 dependencies {

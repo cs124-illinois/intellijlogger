@@ -55,9 +55,8 @@ import org.yaml.snakeyaml.Yaml
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 
-const val NAME = "intellijplugin"
 val version: String = Properties().also {
-    it.load((object {}).javaClass.getResourceAsStream("/${NAME}_version.properties"))
+    it.load((object {}).javaClass.getResourceAsStream("/edu.illinois.cs.cs125.intellijlogger.version"))
 }.getProperty("version")
 val intellijVersion: String = ApplicationInfo.getInstance().strictVersion
 

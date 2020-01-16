@@ -43,7 +43,7 @@ private val logger = KotlinLogging.logger {}
 const val NAME = "intellijlogger"
 const val DEFAULT_HTTP = "http://0.0.0.0:8888"
 val VERSION: String = Properties().also {
-    it.load((object : Any() {}).javaClass.getResourceAsStream("/${NAME}_version.properties"))
+    it.load((object {}).javaClass.getResourceAsStream("/edu.illinois.cs.cs125.intellijlogger.server.version"))
 }.getProperty("version")
 
 object TopLevel : ConfigSpec("") {
@@ -82,6 +82,7 @@ val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
     Adapters.forEach { builder.add(it) }
 }.build().adapter(Counter::class.java)
 
+@Suppress("LongMethod")
 fun Application.intellijlogger() {
     install(XForwardedHeaderSupport)
     install(CORS) {
@@ -99,6 +100,7 @@ fun Application.intellijlogger() {
             currentStatus.statusCount++
         }
         post("/") {
+            @Suppress("TooGenericExceptionCaught")
             val upload = try {
                 call.receive<Counters>()
             } catch (e: Exception) {
@@ -108,6 +110,7 @@ fun Application.intellijlogger() {
                 return@post
             }
 
+            @Suppress("TooGenericExceptionCaught")
             try {
                 val receivedTime = BsonDateTime(Instant.now().toEpochMilli())
                 val receivedIP = BsonString(call.request.origin.remoteHost)
@@ -125,7 +128,8 @@ fun Application.intellijlogger() {
                 currentStatus.lastUpload = Instant.now()
 
                 logger.debug {
-                    "${receivedCounters.size} counters uploaded (${upload.counters.first().index}..${upload.counters.last().index})"
+                    "${receivedCounters.size} counters uploaded (${upload.counters.first().index}" +
+                        "..${upload.counters.last().index})"
                 }
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {

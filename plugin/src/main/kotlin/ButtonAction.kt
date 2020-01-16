@@ -51,7 +51,7 @@ class ButtonAction : AnAction() {
     override fun update(anActionEvent: AnActionEvent) {
         log.trace("update")
         val project = anActionEvent.project ?: run {
-            log.warn("no project")
+            log.debug("no project")
             anActionEvent.presentation.isVisible = false
             return
         }
