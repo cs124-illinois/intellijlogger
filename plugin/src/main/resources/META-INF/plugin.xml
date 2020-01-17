@@ -6,6 +6,7 @@
 
     <description><![CDATA[ Records MP development for CS 125 @ Illinois. ]]></description>
 
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.java</depends>
 
@@ -13,7 +14,7 @@
         <typedHandler implementation="edu.illinois.cs.cs125.intellijlogger.Character"/>
         <enterHandlerDelegate implementation="edu.illinois.cs.cs125.intellijlogger.Enter"/>
         <backspaceHandlerDelegate implementation="edu.illinois.cs.cs125.intellijlogger.Backspace" />
-        <testStatusListener implementation="edu.illinois.cs.cs125.intellijlogger.Component$TestStatusHandler"/>
+        <testStatusListener implementation="edu.illinois.cs.cs125.intellijlogger.TestStatusHandler"/>
         <applicationService serviceImplementation="edu.illinois.cs.cs125.intellijlogger.Persistence"/>
     </extensions>
 

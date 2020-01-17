@@ -1,7 +1,5 @@
 package edu.illinois.cs.cs125.intellijlogger
 
-import com.intellij.execution.testframework.AbstractTestProxy
-import com.intellij.execution.testframework.TestStatusListener
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
@@ -474,44 +472,6 @@ class Component :
             uploadCounters()
         }
         return
-    }
-
-    inner class TestStatusHandler : TestStatusListener() {
-        override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?) {
-            // Nothing to do here
-        }
-
-        private fun countTests(abstractTestProxy: AbstractTestProxy, projectCounter: Counter) {
-            if (!abstractTestProxy.isLeaf) {
-                for (child in abstractTestProxy.children) {
-                    countTests(child, projectCounter)
-                }
-                return
-            }
-            val name = abstractTestProxy.name
-                .replace("\\.test$".toRegex(), "")
-                .replace(".", "_")
-            if (!(projectCounter.testCounts.containsKey(name))) {
-                projectCounter.testCounts[name] = TestCounter()
-            }
-            val testCounter = projectCounter.testCounts[name] ?: return
-            when {
-                abstractTestProxy.isPassed -> testCounter.passed++
-                abstractTestProxy.isDefect -> testCounter.failed++
-                abstractTestProxy.isIgnored -> testCounter.ignored++
-                abstractTestProxy.isInterrupted -> testCounter.interrupted++
-            }
-            projectCounter.totalTestCount++
-        }
-
-        override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?, project: Project) {
-            if (abstractTestProxy == null) {
-                return
-            }
-            val projectCounter = currentProjectCounters[project] ?: return
-            log.trace("testSuiteFinished")
-            countTests(abstractTestProxy, projectCounter)
-        }
     }
 
     override fun caretAdded(caretEvent: CaretEvent) {
