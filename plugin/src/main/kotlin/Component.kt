@@ -1,5 +1,12 @@
 package edu.illinois.cs.cs125.intellijlogger
 
+import com.intellij.execution.ExecutionListener
+import com.intellij.execution.ExecutionManager
+import com.intellij.execution.RunManager
+import com.intellij.execution.RunManagerListener
+import com.intellij.execution.RunnerAndConfigurationSettings
+import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
@@ -77,6 +84,8 @@ class Component :
     ProjectManagerListener,
     CompilationStatusListener,
     FileEditorManagerListener,
+    RunManagerListener,
+    ExecutionListener,
     Disposable {
 
     @NotNull
@@ -97,7 +106,13 @@ class Component :
         val saveOnClose: Boolean
     )
 
-    var projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
+    val projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
+
+    data class ProjectState(
+        var currentRunConfiguration: String?
+    )
+
+    private val projectStates = mutableMapOf<Project, ProjectState>()
 
     override fun initComponent() {
         log.trace("initComponent")
@@ -449,6 +464,10 @@ class Component :
 
         project.messageBus.connect().subscribe(CompilerTopics.COMPILATION_STATUS, this)
         project.messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, this)
+        project.messageBus.connect().subscribe(RunManagerListener.TOPIC, this)
+        project.messageBus.connect().subscribe(ExecutionManager.EXECUTION_TOPIC, this)
+
+        projectStates[project] = ProjectState(RunManager.getInstance(project).selectedConfiguration?.name)
     }
 
     override fun projectClosing(project: Project) {
@@ -471,6 +490,10 @@ class Component :
             lastSuccessfulUpload = 0
             uploadCounters()
         }
+
+        projectConfigurations.remove(project)
+        projectStates.remove(project)
+
         return
     }
 
@@ -601,4 +624,36 @@ class Component :
         projectCounter.fileSelectionChangedCount++
         projectCounter.selectedFile = event.newFile?.path ?: ""
     }
+
+    override fun runConfigurationSelected(runnerAndConfigurationSettings: RunnerAndConfigurationSettings?) {
+        val projectState = projectStates[runnerAndConfigurationSettings?.configuration?.project] ?: return
+        projectState.currentRunConfiguration = runnerAndConfigurationSettings?.name
+    }
+
+    override fun processStarted(
+        executorId: String,
+        executionEnvironment: ExecutionEnvironment,
+        processHandler: ProcessHandler
+    ) {
+        val projectCounter = currentProjectCounters[executionEnvironment.project] ?: return
+        val projectState = projectStates[executionEnvironment.project] ?: return
+
+        log.trace("processStarted")
+        projectCounter.totalRunCount++
+        if (projectState.currentRunConfiguration == null) {
+            log.warn("current run configuration not set")
+            return
+        }
+        val runCounter =
+            projectCounter.runCounts.find { it.name === projectState.currentRunConfiguration } ?: RunCounter(
+                projectState.currentRunConfiguration!!
+            ).also {
+                projectCounter.runCounts.add(it)
+            }
+        runCounter.started++
+    }
+}
+
+internal fun getCounters(project: Project): Counter? {
+    return ApplicationManager.getApplication().getComponent(Component::class.java).currentProjectCounters[project]
 }

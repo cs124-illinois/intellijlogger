@@ -44,7 +44,10 @@ data class Counter(
     var compilerWarningCount: Int = 0,
     var gradingCount: Int = 0,
     var totalTestCount: Int = 0,
-    var testCounts: MutableMap<String, TestCounter> = mutableMapOf(),
+    var testCounts: MutableList<TestCounter> = mutableListOf(),
+    var totalRunCount: Int = 0,
+    var runCounts: MutableList<RunCounter> = mutableListOf(),
+    var externalTaskCount: Int = 0,
     var fileOpenedCount: Int = 0,
     var fileClosedCount: Int = 0,
     var fileSelectionChangedCount: Int = 0,
@@ -70,6 +73,8 @@ data class Counter(
             compilerWarningCount +
             gradingCount +
             totalTestCount +
+            totalRunCount +
+            externalTaskCount +
             fileOpenedCount +
             fileClosedCount +
             fileSelectionChangedCount
@@ -81,7 +86,19 @@ data class Counter(
 }
 
 @JsonClass(generateAdapter = true)
-data class TestCounter(var passed: Int = 0, var failed: Int = 0, var ignored: Int = 0, var interrupted: Int = 0)
+data class TestCounter(
+    val name: String,
+    var passed: Int = 0,
+    var failed: Int = 0,
+    var ignored: Int = 0,
+    var interrupted: Int = 0
+)
 
 @JsonClass(generateAdapter = true)
 data class FileInfo(var path: String = "", var lineCount: Int = 0)
+
+@JsonClass(generateAdapter = true)
+data class RunCounter(
+    val name: String,
+    var started: Int = 0
+)
