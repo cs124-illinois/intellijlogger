@@ -102,8 +102,7 @@ class Component :
         var email: String?,
         val networkAddress: String?,
         val buttonAction: String?,
-        val trustSelfSignedCertificates: Boolean,
-        val saveOnClose: Boolean
+        val trustSelfSignedCertificates: Boolean
     )
 
     val projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
@@ -408,13 +407,6 @@ class Component :
                 false
             }
 
-            @Suppress("CAST_NEVER_SUCCEEDS")
-            val saveOnClose = try {
-                configuration["saveOnClose"] as Boolean
-            } catch (e: Exception) {
-                true
-            }
-
             ProjectConfiguration(
                 destination,
                 name,
@@ -422,8 +414,7 @@ class Component :
                 email,
                 networkAddress,
                 buttonAction,
-                trustSelfSignedCertificates,
-                saveOnClose
+                trustSelfSignedCertificates
             )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
@@ -485,12 +476,10 @@ class Component :
         if (currentProjectCounters.isEmpty()) {
             stateTimer?.cancel()
         }
-        if (projectConfigurations[project]?.saveOnClose == true) {
-            // Force an immediate upload
-            lastSuccessfulUpload = 0
-            uploadCounters()
-        }
-
+        // Force an immediate upload
+        lastSuccessfulUpload = 0
+        uploadCounters()
+        
         projectConfigurations.remove(project)
         projectStates.remove(project)
 
