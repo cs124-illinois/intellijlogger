@@ -24,8 +24,6 @@ import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseListener
 import com.intellij.openapi.editor.event.SelectionEvent
 import com.intellij.openapi.editor.event.SelectionListener
-import com.intellij.openapi.editor.event.VisibleAreaEvent
-import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
@@ -76,7 +74,7 @@ private const val SECONDS_TO_MILLISECONDS = 1000L
 class Component :
     BaseComponent,
     CaretListener,
-    VisibleAreaListener,
+    // VisibleAreaListener,
     EditorMouseListener,
     SelectionListener,
     DocumentListener,
@@ -147,7 +145,7 @@ class Component :
 
         ApplicationManager.getApplication().invokeLater {
             EditorFactory.getInstance().eventMulticaster.addCaretListener(this, this)
-            EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
+            // EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
             EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, this)
             EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, this)
             EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, this)
@@ -156,7 +154,7 @@ class Component :
 
     override fun dispose() {
         EditorFactory.getInstance().eventMulticaster.removeCaretListener(this)
-        EditorFactory.getInstance().eventMulticaster.removeVisibleAreaListener(this)
+        // EditorFactory.getInstance().eventMulticaster.removeVisibleAreaListener(this)
         EditorFactory.getInstance().eventMulticaster.removeEditorMouseListener(this)
         EditorFactory.getInstance().eventMulticaster.removeSelectionListener(this)
         EditorFactory.getInstance().eventMulticaster.removeDocumentListener(this)
@@ -488,11 +486,13 @@ class Component :
         projectCounter.caretPositionChangedCount++
     }
 
+    /*
     override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
         val projectCounter = currentProjectCounters[visibleAreaEvent.editor.project] ?: return
         log.trace("visibleAreaChanged")
         projectCounter.visibleAreaChangedCount++
     }
+    */
 
     override fun mousePressed(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return

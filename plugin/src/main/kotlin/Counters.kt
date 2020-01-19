@@ -25,7 +25,7 @@ data class Counter(
     var caretAdded: Int = 0,
     var caretRemoved: Int = 0,
     var caretPositionChangedCount: Int = 0,
-    var visibleAreaChangedCount: Int = 0,
+    // var visibleAreaChangedCount: Int = 0,
     var mousePressedCount: Int = 0,
     var mouseActivityCount: Int = 0,
     var selectionChangedCount: Int = 0,
@@ -54,10 +54,9 @@ data class Counter(
             caretAdded +
             caretRemoved +
             caretPositionChangedCount +
-            visibleAreaChangedCount +
+            // visibleAreaChangedCount +
             mousePressedCount +
             mouseActivityCount +
-            visibleAreaChangedCount +
             documentChangedCount +
             successfulCompileCount +
             failedCompileCount +
