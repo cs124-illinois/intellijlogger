@@ -9,16 +9,16 @@ plugins {
     kotlin("jvm")
     application
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("com.palantir.docker") version "0.22.2"
+    id("com.palantir.docker") version "0.24.0"
     id("org.jmailen.kotlinter")
 }
 dependencies {
-    val ktorVersion = "1.2.6"
+    val ktorVersion = "1.3.0"
 
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("org.mongodb:mongodb-driver:3.12.0")
+    implementation("org.mongodb:mongodb-driver:3.12.1")
     implementation("io.ktor:ktor-gson:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("com.uchuhimo:konf-core:0.22.1")

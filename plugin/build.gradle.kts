@@ -28,7 +28,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
     implementation("org.yaml:snakeyaml:1.25")
-    implementation("org.apache.httpcomponents:httpclient:4.5.10")
+    implementation("org.apache.httpcomponents:httpclient:4.5.11")
     implementation("com.squareup.moshi:moshi:1.9.2")
 }
 task("createProperties") {
