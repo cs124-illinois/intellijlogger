@@ -40,7 +40,6 @@ data class Counter(
     var testCounts: MutableList<TestCounter> = mutableListOf(),
     var totalRunCount: Int = 0,
     var runCounts: MutableList<RunCounter> = mutableListOf(),
-    var externalTaskCount: Int = 0,
     var fileOpenedCount: Int = 0,
     var fileClosedCount: Int = 0,
     var fileSelectionChangedCount: Int = 0,
@@ -67,7 +66,6 @@ data class Counter(
             gradingCount +
             totalTestCount +
             totalRunCount +
-            externalTaskCount +
             fileOpenedCount +
             fileClosedCount +
             fileSelectionChangedCount
