@@ -37,7 +37,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.wm.WindowManager
 import java.io.File
 import java.net.NetworkInterface
 import java.nio.file.Files
@@ -140,7 +139,9 @@ class Component :
                 counter.UUID = state.UUID
             }
             counter.end = state.lastSave
-            state.savedCounters.add(counter)
+            synchronized(state.savedCounters) {
+                state.savedCounters.add(counter)
+            }
         }
         state.activeCounters.clear()
 
@@ -161,12 +162,12 @@ class Component :
         EditorFactory.getInstance().eventMulticaster.removeDocumentListener(this)
     }
 
-    var uploadBusy = false
+    private var uploadBusy = false
     var lastUploadFailed = false
-    var lastUploadAttempt: Long = 0
+    private var lastUploadAttempt: Long = 0
     var lastSuccessfulUpload: Long = 0
 
-    @Suppress("ReturnCount", "TooGenericExceptionCaught", "ComplexMethod")
+    @Suppress("ReturnCount", "TooGenericExceptionCaught", "ComplexMethod", "NestedBlockDepth")
     @Synchronized
     fun uploadCounters() {
         log.trace("uploadCounters")
@@ -180,103 +181,70 @@ class Component :
             log.trace("No counters to upload")
             return
         }
-
         if (lastUploadFailed && Instant.now().toEpochMilli() - lastUploadAttempt <= SHORTEST_UPLOAD_WAIT) {
             log.trace("Need to wait for longer to retry upload")
             return
         }
-
-        val startIndex = 0
-        val endIndex = state.savedCounters.size
-
-        val uploadingCounters = mutableListOf<Counter>()
-        uploadingCounters.addAll(state.savedCounters)
-
-        if (uploadingCounters.isEmpty()) {
-            log.trace("No counters to upload")
-            return
-        }
-
-        val project = try {
-            ProjectManager.getInstance().openProjects.find { project ->
-                val window = WindowManager.getInstance().suggestParentWindow(project)
-                window != null && window.isFocused
-            } ?: ProjectManager.getInstance().openProjects[0]
-        } catch (e: Exception) {
-            null
-        }
-
-        if (project == null) {
-            log.warn("Can't find project in uploadCounters")
-            return
-        }
+        val currentCount = state.savedCounters.size
 
         val uploadCounterTask = object : Task.Backgroundable(
-            project, "Uploading CS 125 logs...",
+            null, "Uploading CS 125 logs...",
             false
         ) {
             override fun run(progressIndicator: ProgressIndicator) {
-                val now = Instant.now().toEpochMilli()
+                try {
+                    val now = Instant.now().toEpochMilli()
+                    uploadBusy = true
 
-                val projectConfiguration = projectConfigurations[project]
-                if (projectConfiguration == null) {
-                    log.warn("no configuration for project in uploadTask")
-                    return
-                }
+                    @Suppress("LoopWithTooManyJumpStatements")
+                    for (index in 0..currentCount) {
+                        if (state.savedCounters.isEmpty()) {
+                            break
+                        }
+                        val counter = state.savedCounters.first()
+                        val json = Counter.adapter.toJson(counter)
+                        if (counter.destination === "console") {
+                            log.trace(json)
+                            lastUploadFailed = false
+                        } else {
+                            val httpClient = if (counter.trustSelfSignedCertificates) {
+                                HttpClients.custom().setSSLSocketFactory(
+                                    SSLConnectionSocketFactory(
+                                        SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy()).build(),
+                                        NoopHostnameVerifier()
+                                    )
+                                ).build()
+                            } else {
+                                HttpClientBuilder.create().build()
+                            }
 
-                val json = Counters.adapter.toJson(Counters(uploadingCounters))
-                if (json == null) {
-                    log.warn("couldn't convert counters to JSON")
-                    return
-                }
+                            val counterPost = HttpPost(counter.destination).also {
+                                it.addHeader("content-type", "application/json")
+                                it.entity = StringEntity(json)
+                            }
 
-                val destination = projectConfiguration.destination
-                if (destination == "console") {
-                    log.warn("Uploading to console")
-                    log.trace(json)
-                    state.savedCounters.subList(startIndex, endIndex).clear()
-                    log.trace("Upload succeeded")
-                    lastSuccessfulUpload = now
-                    lastUploadFailed = false
-                    return
-                }
-
-                val httpClient = if (projectConfiguration.trustSelfSignedCertificates) {
-                    HttpClients.custom().setSSLSocketFactory(
-                        SSLConnectionSocketFactory(
-                            SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy()).build(),
-                            NoopHostnameVerifier()
-                        )
-                    ).build()
-                } else {
-                    HttpClientBuilder.create().build()
-                }
-                val counterPost = HttpPost(destination)
-                counterPost.addHeader("content-type", "application/json")
-                counterPost.entity = StringEntity(json)
-
-                log.trace(
-                    "Uploading ${state.savedCounters[startIndex].index}..${state.savedCounters[endIndex - 1].index}"
-                )
-
-                lastUploadFailed = try {
-                    val response = httpClient.execute(counterPost)
-                    assert(response.statusLine.statusCode == HttpStatus.SC_OK) {
-                        "upload failed: ${response.statusLine}"
+                            lastUploadFailed = try {
+                                val response = httpClient.execute(counterPost)
+                                assert(response.statusLine.statusCode == HttpStatus.SC_OK) {
+                                    "upload failed: ${response.statusLine}"
+                                }
+                                false
+                            } catch (e: Throwable) {
+                                log.warn("Upload failed: $e")
+                                true
+                            }
+                        }
+                        if (lastUploadFailed) {
+                            break
+                        }
+                        log.trace("Upload succeeded (${counter.index}) -> ${counter.destination}")
+                        lastSuccessfulUpload = now
+                        synchronized(state.savedCounters) {
+                            state.savedCounters.removeAt(0)
+                        }
                     }
-
-                    state.savedCounters.subList(startIndex, endIndex).clear()
-
-                    log.trace("Upload succeeded")
-                    lastSuccessfulUpload = now
-
-                    false
-                } catch (e: Throwable) {
-                    log.warn("Upload failed: $e")
-                    true
                 } finally {
                     uploadBusy = false
-                    lastUploadAttempt = now
                 }
             }
         }
@@ -285,6 +253,7 @@ class Component :
 
     private var emptyIntervals = 0
     @Synchronized
+    @Suppress("ComplexMethod", "LongMethod")
     fun rotateCounters() {
         log.trace("rotateCounters")
 
@@ -296,8 +265,14 @@ class Component :
             emptyIntervals++
         } else {
             emptyIntervals = 0
+            @Suppress("LoopWithTooManyJumpStatements")
             for ((project, counter) in currentProjectCounters) {
                 if (counter.isEmpty()) {
+                    continue
+                }
+                val projectConfiguration = projectConfigurations[project]
+                if (projectConfiguration == null) {
+                    log.warn("Missing project configuration in rotate")
                     continue
                 }
                 counter.end = end
@@ -314,10 +289,14 @@ class Component :
 
                 log.trace("Counter $counter")
 
-                state.savedCounters.add(counter)
+                synchronized(state.savedCounters) {
+                    state.savedCounters.add(counter)
+                }
                 state.activeCounters.remove(counter)
 
                 val newCounter = Counter(
+                    projectConfiguration.destination,
+                    projectConfiguration.trustSelfSignedCertificates,
                     state.UUID,
                     state.counterIndex++,
                     counter.index,
@@ -328,6 +307,7 @@ class Component :
                     intellijVersion
                 )
                 currentProjectCounters[project] = newCounter
+
                 state.activeCounters.add(newCounter)
             }
         }
@@ -427,6 +407,8 @@ class Component :
         val state = Persistence.getInstance().persistentState
 
         val newCounter = Counter(
+            projectConfiguration.destination,
+            projectConfiguration.trustSelfSignedCertificates,
             state.UUID,
             state.counterIndex++,
             -1,
@@ -479,7 +461,7 @@ class Component :
         // Force an immediate upload
         lastSuccessfulUpload = 0
         uploadCounters()
-        
+
         projectConfigurations.remove(project)
         projectStates.remove(project)
 

@@ -6,18 +6,11 @@ import com.squareup.moshi.Moshi
 import edu.illinois.cs.cs125.intellijlogger.moshi.Adapters
 import java.time.Instant
 
-@JsonClass(generateAdapter = true)
-data class Counters(val counters: List<Counter>) {
-    companion object {
-        val adapter: JsonAdapter<Counters> = Moshi.Builder().also { builder ->
-            Adapters.forEach { builder.add(it) }
-        }.build().adapter(Counters::class.java)
-    }
-}
-
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @JsonClass(generateAdapter = true)
 data class Counter(
+    var destination: String = "",
+    var trustSelfSignedCertificates: Boolean = false,
     @Suppress("ConstructorParameterNaming") var UUID: String = "",
     var index: Long = 0,
     var previousIndex: Long = -1,
@@ -82,6 +75,12 @@ data class Counter(
 
     fun isEmpty(): Boolean {
         return totalCount() == 0
+    }
+
+    companion object {
+        val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
+            Adapters.forEach { builder.add(it) }
+        }.build().adapter(Counter::class.java)
     }
 }
 

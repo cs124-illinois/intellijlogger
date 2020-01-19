@@ -1,18 +1,17 @@
 package edu.illinois.cs.cs125.intellijlogger.server
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
 import com.mongodb.client.MongoCollection
-import com.ryanharter.ktor.moshi.moshi
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.json.toJson
-import edu.illinois.cs.cs125.intellijlogger.Counter
-import edu.illinois.cs.cs125.intellijlogger.Counters
-import edu.illinois.cs.cs125.intellijlogger.moshi.Adapters
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
@@ -21,6 +20,7 @@ import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.XForwardedHeaderSupport
 import io.ktor.features.origin
+import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -29,6 +29,7 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import java.lang.reflect.Type
 import java.net.URI
 import java.time.Instant
 import java.util.Properties
@@ -65,7 +66,6 @@ val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mong
 }
 
 @Suppress("unused")
-@JsonClass(generateAdapter = true)
 class Status {
     var name: String = NAME
     var version: String = VERSION
@@ -78,9 +78,7 @@ class Status {
 
 val currentStatus = Status()
 
-val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
-    Adapters.forEach { builder.add(it) }
-}.build().adapter(Counter::class.java)
+val gson = Gson()
 
 @Suppress("LongMethod")
 fun Application.intellijlogger() {
@@ -90,8 +88,16 @@ fun Application.intellijlogger() {
         allowNonSimpleContentTypes = true
     }
     install(ContentNegotiation) {
-        moshi {
-            Adapters.forEach { this.add(it) }
+        gson {
+            registerTypeAdapter(Instant::class.java, object : JsonSerializer<Instant> {
+                override fun serialize(
+                    instant: Instant?,
+                    typeOfSrc: Type?,
+                    context: JsonSerializationContext?
+                ): JsonElement {
+                    return JsonPrimitive(instant.toString())
+                }
+            })
         }
     }
     routing {
@@ -100,9 +106,10 @@ fun Application.intellijlogger() {
             currentStatus.statusCount++
         }
         post("/") {
+
             @Suppress("TooGenericExceptionCaught")
             val upload = try {
-                call.receive<Counters>()
+                call.receive<JsonObject>()
             } catch (e: Exception) {
                 logger.warn { "couldn't deserialize counters: $e" }
                 call.respond(HttpStatusCode.BadRequest)
@@ -116,21 +123,28 @@ fun Application.intellijlogger() {
                 val receivedIP = BsonString(call.request.origin.remoteHost)
                 val receivedSemester = BsonString(configuration[TopLevel.semester])
 
-                val receivedCounters = upload.counters.map { counter ->
-                    BsonDocument.parse(adapter.toJson(counter))
+                val counters = if (upload.has("counters")) {
+                    upload.getAsJsonArray("counters").toList()
+                } else {
+                    listOf(upload)
+                }
+                counters.map { counter ->
+                    BsonDocument.parse(gson.toJson(counter))
                         .append("receivedVersion", BsonString(VERSION))
                         .append("receivedTime", receivedTime)
                         .append("receivedIP", receivedIP)
                         .append("receivedSemester", receivedSemester)
+                }.let { receivedCounters ->
+                    mongoCollection.insertMany(receivedCounters)
+                    currentStatus.uploadCount += receivedCounters.size
+                    currentStatus.lastUpload = Instant.now()
                 }
-                mongoCollection.insertMany(receivedCounters)
-                currentStatus.uploadCount += receivedCounters.size
-                currentStatus.lastUpload = Instant.now()
-
                 logger.debug {
-                    "${receivedCounters.size} counters uploaded (${upload.counters.first().index}" +
-                        "..${upload.counters.last().index})"
+                    "${counters.size} counters uploaded " +
+                        "(${counters.first().asJsonObject.getAsJsonPrimitive("index").asLong}" +
+                        "..${counters.last().asJsonObject.getAsJsonPrimitive("index").asLong})"
                 }
+
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 logger.warn { "couldn't save upload: $e" }

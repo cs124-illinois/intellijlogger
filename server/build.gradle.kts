@@ -3,11 +3,10 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2020.1.2"
+version = "2020.1.3"
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
     application
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("com.palantir.docker") version "0.22.2"
@@ -16,14 +15,11 @@ plugins {
 dependencies {
     val ktorVersion = "1.2.6"
 
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.9.2")
-
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("org.mongodb:mongodb-driver:3.12.0")
-    implementation("com.squareup.moshi:moshi:1.9.2")
-    implementation("com.ryanharter.ktor:ktor-moshi:1.0.1")
+    implementation("io.ktor:ktor-gson:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("com.uchuhimo:konf-core:0.22.1")
     implementation("com.uchuhimo:konf-yaml:0.22.1")

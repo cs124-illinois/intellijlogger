@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Storage
 import java.time.Instant
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.xml"))])
+@State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.2020.1.3.191.xml"))])
 class Persistence : PersistentStateComponent<Persistence.State> {
     data class State(
         var activeCounters: MutableList<Counter> = mutableListOf(),
