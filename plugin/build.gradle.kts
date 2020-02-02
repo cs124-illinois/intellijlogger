@@ -4,13 +4,13 @@ import java.io.File
 
 val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
-version = "2020.1.5.$majorIntelliJVersion"
+version = "2020.2.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.4.15"
+    id("org.jetbrains.intellij") version "0.4.16"
     id("org.jmailen.kotlinter")
 }
 intellij {

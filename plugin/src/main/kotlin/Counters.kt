@@ -83,7 +83,7 @@ data class Counter(
 
 @JsonClass(generateAdapter = true)
 data class TestCounter(
-    val name: String,
+    val name: String = "",
     var passed: Int = 0,
     var failed: Int = 0,
     var ignored: Int = 0,
@@ -95,6 +95,6 @@ data class FileInfo(var path: String = "", var lineCount: Int = 0)
 
 @JsonClass(generateAdapter = true)
 data class RunCounter(
-    val name: String,
+    val name: String = "",
     var started: Int = 0
 )
