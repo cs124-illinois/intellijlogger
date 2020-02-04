@@ -4,7 +4,7 @@ import java.io.File
 
 val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
-version = "2020.2.0.$majorIntelliJVersion"
+version = "2020.2.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")

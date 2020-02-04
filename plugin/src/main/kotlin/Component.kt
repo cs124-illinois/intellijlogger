@@ -191,6 +191,10 @@ class Component :
         ) {
             override fun run(progressIndicator: ProgressIndicator) {
                 try {
+                    if (uploadBusy) {
+                        log.warn("Previous upload still busy")
+                        return
+                    }
                     val now = Instant.now().toEpochMilli()
                     uploadBusy = true
 
@@ -238,7 +242,11 @@ class Component :
                         log.trace("Upload succeeded (${counter.index}) -> ${counter.destination}")
                         lastSuccessfulUpload = now
                         synchronized(state.savedCounters) {
-                            state.savedCounters.removeAt(0)
+                            try {
+                                state.savedCounters.removeAt(0)
+                            } catch (e: Exception) {
+                                log.warn("Problem removing head counter: $e")
+                            }
                         }
                     }
                 } finally {
