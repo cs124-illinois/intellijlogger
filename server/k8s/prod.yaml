@@ -50,7 +50,6 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/proxy-redirect-from: /
     nginx.ingress.kubernetes.io/proxy-redirect-to: /intellijlogger/
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
   name: intellijlogger-ingress
 spec:
   rules:

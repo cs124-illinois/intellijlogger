@@ -3,17 +3,17 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2020.1.3"
+version = "2020.2.0"
 
 plugins {
     kotlin("jvm")
     application
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("com.palantir.docker") version "0.24.0"
+    id("com.palantir.docker") version "0.25.0"
     id("org.jmailen.kotlinter")
 }
 dependencies {
-    val ktorVersion = "1.3.0"
+    val ktorVersion = "1.3.1"
 
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
