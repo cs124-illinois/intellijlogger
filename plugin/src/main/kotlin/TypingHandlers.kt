@@ -4,7 +4,6 @@ import com.intellij.codeInsight.editorActions.BackspaceHandlerDelegate
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate
 import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.fileTypes.FileType
@@ -13,9 +12,7 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiFile
 
 private fun countCharacter(project: Project?) {
-    ApplicationManager
-        .getApplication()
-        .getComponent(Component::class.java).currentProjectCounters[project]?.let { counters ->
+    project?.counters()?.let { counters ->
         log.trace("countCharacter (${counters.keystrokeCount})")
         counters.keystrokeCount++
     } ?: run {

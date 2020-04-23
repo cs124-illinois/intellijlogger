@@ -13,7 +13,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.compiler.CompilationStatusListener
 import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerTopics
-import com.intellij.openapi.components.BaseComponent
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.CaretEvent
@@ -32,8 +32,9 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
+import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
 import java.io.File
 import java.net.NetworkInterface
@@ -41,7 +42,7 @@ import java.nio.file.Files
 import java.time.Instant
 import java.util.Properties
 import java.util.Timer
-import java.util.UUID
+// import java.util.UUID
 import kotlin.concurrent.timer
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
@@ -52,7 +53,6 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
-import org.jetbrains.annotations.NotNull
 import org.yaml.snakeyaml.Yaml
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
@@ -71,8 +71,8 @@ private const val SHORTEST_UPLOAD_INTERVAL = 10 * 60 * 1000 // 10 minutes
 private const val SECONDS_TO_MILLISECONDS = 1000L
 
 @Suppress("TooManyFunctions")
-class Component :
-    BaseComponent,
+class StartupActivity :
+    StartupActivity,
     CaretListener,
     // VisibleAreaListener,
     EditorMouseListener,
@@ -82,83 +82,20 @@ class Component :
     CompilationStatusListener,
     FileEditorManagerListener,
     RunManagerListener,
-    ExecutionListener,
-    Disposable {
+    ExecutionListener {
 
-    @NotNull
-    override fun getComponentName(): String {
-        return "CS125 Plugin"
+    private val currentProjectCounters by lazy {
+        ServiceManager.getService(ApplicationService::class.java).currentProjectCounters
     }
 
-    var currentProjectCounters = mutableMapOf<Project, Counter>()
-
-    data class ProjectConfiguration(
-        val destination: String,
-        val name: String,
-        val emailLocation: String?,
-        var email: String?,
-        val networkAddress: String?,
-        val buttonAction: String?,
-        val trustSelfSignedCertificates: Boolean
-    )
-
-    val projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
+    private val projectConfigurations by lazy {
+        ServiceManager.getService(ApplicationService::class.java).projectConfigurations
+    }
 
     data class ProjectState(
         var currentRunConfiguration: String?
     )
-
     private val projectStates = mutableMapOf<Project, ProjectState>()
-
-    override fun initComponent() {
-        log.trace("initComponent")
-
-        val connection = ApplicationManager.getApplication().messageBus.connect()
-        connection.subscribe(ProjectManager.TOPIC, this)
-
-        val state = Persistence.getInstance().persistentState
-        log.trace("Loading " + state.savedCounters.size.toString() + " counters")
-
-        if (state.UUID == "") {
-            state.UUID = UUID.randomUUID().toString()
-            if (state.savedCounters.size != 0) {
-                log.warn("Must be updating plugin since saved counters exist before UUID is set")
-            }
-        }
-        for (counter in state.savedCounters) {
-            if (counter.UUID != state.UUID) {
-                log.warn("Altering counter with bad UUID: ${counter.UUID} != ${state.UUID}")
-                counter.UUID = state.UUID
-            }
-        }
-        for (counter in state.activeCounters) {
-            if (counter.UUID != state.UUID) {
-                log.warn("Altering counter with bad UUID: ${counter.UUID} != ${state.UUID}")
-                counter.UUID = state.UUID
-            }
-            counter.end = state.lastSave
-            synchronized(state.savedCounters) {
-                state.savedCounters.add(counter)
-            }
-        }
-        state.activeCounters.clear()
-
-        ApplicationManager.getApplication().invokeLater {
-            EditorFactory.getInstance().eventMulticaster.addCaretListener(this, this)
-            // EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
-            EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, this)
-            EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, this)
-            EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, this)
-        }
-    }
-
-    override fun dispose() {
-        EditorFactory.getInstance().eventMulticaster.removeCaretListener(this)
-        // EditorFactory.getInstance().eventMulticaster.removeVisibleAreaListener(this)
-        EditorFactory.getInstance().eventMulticaster.removeEditorMouseListener(this)
-        EditorFactory.getInstance().eventMulticaster.removeSelectionListener(this)
-        EditorFactory.getInstance().eventMulticaster.removeDocumentListener(this)
-    }
 
     private var uploadBusy = false
     var lastUploadFailed = false
@@ -174,7 +111,7 @@ class Component :
             return
         }
 
-        val state = Persistence.getInstance().persistentState
+        val state = ApplicationService.getInstance()._state
         if (state.savedCounters.size == 0) {
             log.trace("No counters to upload")
             return
@@ -189,6 +126,7 @@ class Component :
             null, "Uploading CS 125 logs...",
             false
         ) {
+            @Suppress("LongMethod")
             override fun run(progressIndicator: ProgressIndicator) {
                 try {
                     if (uploadBusy) {
@@ -263,7 +201,7 @@ class Component :
     fun rotateCounters() {
         log.trace("rotateCounters")
 
-        val state = Persistence.getInstance().persistentState
+        val state = ApplicationService.getInstance()._state
         val end = Instant.now().toEpochMilli()
 
         if (currentProjectCounters.values.none { !it.isEmpty() }) {
@@ -337,8 +275,8 @@ class Component :
 
     private var stateTimer: Timer? = null
     @Suppress("ComplexMethod", "LongMethod", "NestedBlockDepth", "TooGenericExceptionCaught")
-    override fun projectOpened(project: Project) {
-        log.trace("projectOpened")
+    override fun runActivity(project: Project) {
+        log.info("projectOpened")
 
         val configurationFile = File(project.basePath.toString()).resolve(File(".intellijlogger.yaml"))
         if (!configurationFile.exists()) {
@@ -410,7 +348,7 @@ class Component :
         log.trace(projectConfiguration.toString())
         projectConfigurations[project] = projectConfiguration
 
-        val state = Persistence.getInstance().persistentState
+        val state = ApplicationService.getInstance()._state
 
         val newCounter = Counter(
             projectConfiguration.destination,
@@ -438,6 +376,13 @@ class Component :
             ) {
                 rotateCounters()
             }
+            ApplicationManager.getApplication().invokeLater {
+                EditorFactory.getInstance().eventMulticaster.addCaretListener(this, project)
+                // EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
+                EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, project)
+                EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, project)
+                EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, project)
+            }
         }
         uploadCounters()
 
@@ -447,13 +392,17 @@ class Component :
         project.messageBus.connect().subscribe(ExecutionManager.EXECUTION_TOPIC, this)
 
         projectStates[project] = ProjectState(RunManager.getInstance(project).selectedConfiguration?.name)
+
+        Disposer.register(project, Disposable {
+            projectClosing(project)
+        })
     }
 
     override fun projectClosing(project: Project) {
         log.trace("projectClosing")
 
         val currentCounter = currentProjectCounters[project] ?: return
-        val state = Persistence.getInstance().persistentState
+        val state = ApplicationService.getInstance()._state
 
         // We save this counter regardless of whether it has counts just to mark the end of a session
         currentCounter.end = Instant.now().toEpochMilli()
@@ -463,6 +412,12 @@ class Component :
         currentProjectCounters.remove(project)
         if (currentProjectCounters.isEmpty()) {
             stateTimer?.cancel()
+
+            EditorFactory.getInstance().eventMulticaster.removeCaretListener(this)
+            // EditorFactory.getInstance().eventMulticaster.removeVisibleAreaListener(this)
+            EditorFactory.getInstance().eventMulticaster.removeEditorMouseListener(this)
+            EditorFactory.getInstance().eventMulticaster.removeSelectionListener(this)
+            EditorFactory.getInstance().eventMulticaster.removeDocumentListener(this)
         }
         // Force an immediate upload
         lastSuccessfulUpload = 0
@@ -631,8 +586,4 @@ class Component :
             }
         runCounter.started++
     }
-}
-
-internal fun getCounters(project: Project): Counter? {
-    return ApplicationManager.getApplication().getComponent(Component::class.java).currentProjectCounters[project]
 }

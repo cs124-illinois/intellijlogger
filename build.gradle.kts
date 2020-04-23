@@ -1,12 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.3.61"
+    val kotlinVersion = "1.3.72"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("kapt") version kotlinVersion apply false
-    id("org.jmailen.kotlinter") version "2.3.0" apply false
-    id("com.github.ben-manes.versions") version "0.27.0"
-    id("io.gitlab.arturbosch.detekt") version "1.5.1"
+    id("org.jmailen.kotlinter") version "2.3.2" apply false
+    id("com.github.ben-manes.versions") version "0.28.0"
+    id("io.gitlab.arturbosch.detekt") version "1.8.0"
 }
 allprojects {
     repositories {
@@ -31,7 +31,7 @@ tasks.dependencyUpdates {
     resolutionStrategy {
         componentSelection {
             all {
-                if (listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap").any { qualifier ->
+                if (listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap", "release").any { qualifier ->
                     candidate.version.matches(Regex("(?i).*[.-]$qualifier[.\\d-+]*"))
                 }) {
                     reject("Release candidate")
@@ -42,7 +42,9 @@ tasks.dependencyUpdates {
     gradleReleaseChannel = "current"
 }
 detekt {
-    toolVersion = "1.1.1"
     input = files("plugin/src/main/kotlin", "server/src/main/kotlin")
     config = files("config/detekt/detekt.yml")
+}
+tasks.register("check") {
+    dependsOn("detekt")
 }

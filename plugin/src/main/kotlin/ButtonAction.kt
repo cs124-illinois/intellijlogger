@@ -6,15 +6,13 @@ import com.intellij.execution.RunnerAndConfigurationSettings
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 
 fun Project.getButtonAction(): RunnerAndConfigurationSettings? {
-    val projectConfiguration =
-        ApplicationManager.getApplication().getComponent(Component::class.java).projectConfigurations[this] ?: run {
-            log.trace("no configuration for project")
-            return null
-        }
+    val projectConfiguration = this.configuration() ?: run {
+        log.trace("no configuration for project")
+        return null
+    }
     val pattern = projectConfiguration.buttonAction ?: run {
         log.trace("no buttonAction for project")
         return null
@@ -37,15 +35,12 @@ class ButtonAction : AnAction() {
             return
         }
         val buttonAction = project.getButtonAction() ?: return
-        val counters =
-            ApplicationManager.getApplication().getComponent(Component::class.java).currentProjectCounters[project]
-                ?: run {
-                    log.warn("can't get counters for project")
-                    return
-                }
-
-        ProgramRunnerUtil.executeConfiguration(buttonAction, DefaultRunExecutor.getRunExecutorInstance())
-        counters.gradingCount++
+        project.counters()?.let { counters ->
+            ProgramRunnerUtil.executeConfiguration(buttonAction, DefaultRunExecutor.getRunExecutorInstance())
+            counters.gradingCount++
+        } ?: run {
+            log.warn("can't get counters for project")
+        }
     }
 
     override fun update(anActionEvent: AnActionEvent) {

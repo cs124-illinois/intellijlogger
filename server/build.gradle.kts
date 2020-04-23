@@ -3,7 +3,7 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2020.2.1"
+version = "2020.4.0"
 
 plugins {
     kotlin("jvm")
@@ -13,17 +13,17 @@ plugins {
     id("org.jmailen.kotlinter")
 }
 dependencies {
-    val ktorVersion = "1.3.1"
+    val ktorVersion = "1.3.2"
 
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("org.mongodb:mongodb-driver:3.12.1")
+    implementation("org.mongodb:mongodb-driver:3.12.3")
     implementation("io.ktor:ktor-gson:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("com.uchuhimo:konf-core:0.22.1")
     implementation("com.uchuhimo:konf-yaml:0.22.1")
-    implementation("io.github.microutils:kotlin-logging:1.7.8")
+    implementation("io.github.microutils:kotlin-logging:1.7.9")
 
     val kotlintestVersion = "3.4.2"
     testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlintestVersion")
@@ -43,7 +43,7 @@ docker {
 tasks.test {
     useJUnitPlatform()
     systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback.xml").absolutePath
-    environment("MONGODB", "mongodb://localhost:27048/testing")
+    environment("MONGODB", "mongodb://localhost:27017/testing")
 }
 tasks.jar {
     manifest {

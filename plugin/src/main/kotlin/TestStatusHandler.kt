@@ -30,11 +30,11 @@ class TestStatusHandler : TestStatusListener() {
         projectCounter.totalTestCount++
     }
 
-    override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?, project: Project) {
+    override fun testSuiteFinished(abstractTestProxy: AbstractTestProxy?, project: Project?) {
         if (abstractTestProxy == null) {
             return
         }
-        getCounters(project)?.let { counters ->
+        project?.counters()?.let { counters ->
             log.trace("testSuiteFinished")
             countTests(abstractTestProxy, counters)
         } ?: run {

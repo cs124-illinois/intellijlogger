@@ -4,31 +4,31 @@ import java.io.File
 
 val majorIntelliJVersion = "191"
 group = "edu.illinois.cs.cs125"
-version = "2020.2.1.$majorIntelliJVersion"
+version = "2020.4.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.4.16"
+    id("org.jetbrains.intellij") version "0.4.18"
     id("org.jmailen.kotlinter")
 }
 intellij {
     pluginName = "CS 125 IntelliJ Activity Logger"
-    version = "2019.3"
+    version = "2020.1"
     sandboxDirectory = File(projectDir, "sandbox").absolutePath
     setPlugins("java")
 }
 tasks.patchPluginXml {
     sinceBuild(majorIntelliJVersion)
-    untilBuild("193.*")
+    untilBuild("201.*")
 }
 dependencies {
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.9.2")
 
     implementation(kotlin("stdlib"))
-    implementation("org.yaml:snakeyaml:1.25")
-    implementation("org.apache.httpcomponents:httpclient:4.5.11")
+    implementation("org.yaml:snakeyaml:1.26")
+    implementation("org.apache.httpcomponents:httpclient:4.5.12")
     implementation("com.squareup.moshi:moshi:1.9.2")
 }
 task("createProperties") {
