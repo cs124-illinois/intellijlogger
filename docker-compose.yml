@@ -13,9 +13,11 @@ services:
       - intellijlogger
     environment:
       - "MONGODB=mongodb://mongodb/cs125"
-      - "SEMESTER=Spring2020"
+      - "SEMESTER=Spring2021"
   mongodb:
-    image: "bitnami/mongodb:4.0"
+    image: "bitnami/mongodb:4.4.3"
+    logging:
+      driver: none
     ports:
       - "27017:27017"
     volumes:

@@ -29,14 +29,14 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import java.lang.reflect.Type
-import java.net.URI
-import java.time.Instant
-import java.util.Properties
 import mu.KotlinLogging
 import org.bson.BsonDateTime
 import org.bson.BsonDocument
 import org.bson.BsonString
+import java.lang.reflect.Type
+import java.net.URI
+import java.time.Instant
+import java.util.Properties
 
 @Suppress("UNUSED")
 private val logger = KotlinLogging.logger {}
@@ -89,15 +89,18 @@ fun Application.intellijlogger() {
     }
     install(ContentNegotiation) {
         gson {
-            registerTypeAdapter(Instant::class.java, object : JsonSerializer<Instant> {
-                override fun serialize(
-                    instant: Instant?,
-                    typeOfSrc: Type?,
-                    context: JsonSerializationContext?
-                ): JsonElement {
-                    return JsonPrimitive(instant.toString())
+            registerTypeAdapter(
+                Instant::class.java,
+                object : JsonSerializer<Instant> {
+                    override fun serialize(
+                        instant: Instant?,
+                        typeOfSrc: Type?,
+                        context: JsonSerializationContext?
+                    ): JsonElement {
+                        return JsonPrimitive(instant.toString())
+                    }
                 }
-            })
+            )
         }
     }
     routing {

@@ -3,36 +3,36 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2020.4.0"
+version = "2021.2.0"
 
 plugins {
     kotlin("jvm")
     application
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("com.palantir.docker") version "0.25.0"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.palantir.docker") version "0.26.0"
     id("org.jmailen.kotlinter")
 }
 dependencies {
-    val ktorVersion = "1.3.2"
+    val ktorVersion = "1.5.1"
 
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("org.mongodb:mongodb-driver:3.12.3")
+    implementation("org.mongodb:mongodb-driver:3.12.7")
     implementation("io.ktor:ktor-gson:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.uchuhimo:konf-core:0.22.1")
-    implementation("com.uchuhimo:konf-yaml:0.22.1")
-    implementation("io.github.microutils:kotlin-logging:1.7.9")
+    implementation("com.uchuhimo:konf-core:1.0.0")
+    implementation("com.uchuhimo:konf-yaml:1.0.0")
+    implementation("io.github.microutils:kotlin-logging:2.0.4")
 
-    val kotlintestVersion = "3.4.2"
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlintestVersion")
-    testImplementation("io.kotlintest:kotlintest-assertions-ktor:$kotlintestVersion")
+    val kotestVersion = "4.4.0"
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-ktor:$kotestVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 }
-val mainClass = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
 application {
-    mainClassName = mainClass
+    @Suppress("DEPRECATION")
+    mainClassName = "edu.illinois.cs.cs125.intellijlogger.server.MainKt"
 }
 docker {
     name = "cs125/intellijlogger"
@@ -44,11 +44,6 @@ tasks.test {
     useJUnitPlatform()
     systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback.xml").absolutePath
     environment("MONGODB", "mongodb://localhost:27017/testing")
-}
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = mainClass
-    }
 }
 task("createProperties") {
     doLast {

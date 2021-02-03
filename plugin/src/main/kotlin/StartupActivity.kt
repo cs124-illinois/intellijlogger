@@ -7,7 +7,6 @@ import com.intellij.execution.RunManagerListener
 import com.intellij.execution.RunnerAndConfigurationSettings
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.compiler.CompilationStatusListener
@@ -36,14 +35,6 @@ import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
-import java.io.File
-import java.net.NetworkInterface
-import java.nio.file.Files
-import java.time.Instant
-import java.util.Properties
-import java.util.Timer
-// import java.util.UUID
-import kotlin.concurrent.timer
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.conn.ssl.NoopHostnameVerifier
@@ -54,6 +45,13 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
 import org.yaml.snakeyaml.Yaml
+import java.io.File
+import java.net.NetworkInterface
+import java.nio.file.Files
+import java.time.Instant
+import java.util.Properties
+import java.util.Timer
+import kotlin.concurrent.timer
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
 
@@ -95,6 +93,7 @@ class StartupActivity :
     data class ProjectState(
         var currentRunConfiguration: String?
     )
+
     private val projectStates = mutableMapOf<Project, ProjectState>()
 
     private var uploadBusy = false
@@ -196,6 +195,7 @@ class StartupActivity :
     }
 
     private var emptyIntervals = 0
+
     @Synchronized
     @Suppress("ComplexMethod", "LongMethod")
     fun rotateCounters() {
@@ -274,6 +274,7 @@ class StartupActivity :
     }
 
     private var stateTimer: Timer? = null
+
     @Suppress("ComplexMethod", "LongMethod", "NestedBlockDepth", "TooGenericExceptionCaught")
     override fun runActivity(project: Project) {
         log.info("projectOpened")
@@ -348,7 +349,8 @@ class StartupActivity :
         log.trace(projectConfiguration.toString())
         projectConfigurations[project] = projectConfiguration
 
-        val state = ApplicationService.getInstance()._state
+        val stateService = ApplicationService.getInstance()
+        val state = stateService._state
 
         val newCounter = Counter(
             projectConfiguration.destination,
@@ -377,11 +379,11 @@ class StartupActivity :
                 rotateCounters()
             }
             ApplicationManager.getApplication().invokeLater {
-                EditorFactory.getInstance().eventMulticaster.addCaretListener(this, project)
+                EditorFactory.getInstance().eventMulticaster.addCaretListener(this, stateService)
                 // EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
-                EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, project)
-                EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, project)
-                EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, project)
+                EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, stateService)
+                EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, stateService)
+                EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, stateService)
             }
         }
         uploadCounters()
@@ -393,13 +395,16 @@ class StartupActivity :
 
         projectStates[project] = ProjectState(RunManager.getInstance(project).selectedConfiguration?.name)
 
-        Disposer.register(project, Disposable {
-            projectClosing(project)
-        })
+        Disposer.register(
+            ServiceManager.getService(project, ProjectService::class.java),
+            {
+                projectClosing(project)
+            }
+        )
     }
 
     override fun projectClosing(project: Project) {
-        log.trace("projectClosing")
+        log.info("projectClosing")
 
         val currentCounter = currentProjectCounters[project] ?: return
         val state = ApplicationService.getInstance()._state

@@ -1,5 +1,6 @@
 package edu.illinois.cs.cs125.intellijlogger
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
@@ -20,7 +21,7 @@ data class ProjectConfiguration(
 
 @Suppress("unused")
 @State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.2020.2.0.191.xml"))])
-class ApplicationService : PersistentStateComponent<ApplicationService.State> {
+class ApplicationService : PersistentStateComponent<ApplicationService.State>, Disposable {
     data class State(
         var activeCounters: MutableList<Counter> = mutableListOf(),
         var savedCounters: MutableList<Counter> = mutableListOf(),
@@ -80,6 +81,10 @@ class ApplicationService : PersistentStateComponent<ApplicationService.State> {
         fun getInstance(): ApplicationService {
             return ServiceManager.getService(ApplicationService::class.java)
         }
+    }
+
+    override fun dispose() {
+        return
     }
 }
 
