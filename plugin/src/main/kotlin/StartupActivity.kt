@@ -332,6 +332,12 @@ class StartupActivity :
                 false
             }
 
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            val uploadOnClose = try {
+                configuration["uploadOnClose"] as Boolean
+            } catch (e: Exception) {
+                false
+            }
             ProjectConfiguration(
                 destination,
                 name,
@@ -339,7 +345,8 @@ class StartupActivity :
                 email,
                 networkAddress,
                 buttonAction,
-                trustSelfSignedCertificates
+                trustSelfSignedCertificates,
+                uploadOnClose
             )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
@@ -424,9 +431,12 @@ class StartupActivity :
             EditorFactory.getInstance().eventMulticaster.removeSelectionListener(this)
             EditorFactory.getInstance().eventMulticaster.removeDocumentListener(this)
         }
-        // Force an immediate upload
-        lastSuccessfulUpload = 0
-        uploadCounters()
+
+        if (projectConfigurations[project]?.uploadOnClose == true) {
+            // Force an immediate upload
+            lastSuccessfulUpload = 0
+            uploadCounters()
+        }
 
         projectConfigurations.remove(project)
         projectStates.remove(project)

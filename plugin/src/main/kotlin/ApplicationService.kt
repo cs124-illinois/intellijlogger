@@ -16,7 +16,8 @@ data class ProjectConfiguration(
     var email: String?,
     val networkAddress: String?,
     val buttonAction: String?,
-    val trustSelfSignedCertificates: Boolean
+    val trustSelfSignedCertificates: Boolean,
+    val uploadOnClose: Boolean
 )
 
 @Suppress("unused")

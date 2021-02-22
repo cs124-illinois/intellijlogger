@@ -10,7 +10,7 @@ plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.6.5"
+    id("org.jetbrains.intellij") version "0.7.1"
     id("org.jmailen.kotlinter")
 }
 intellij {
@@ -27,7 +27,7 @@ dependencies {
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.11.0")
 
     implementation(kotlin("stdlib"))
-    implementation("org.yaml:snakeyaml:1.27")
+    implementation("org.yaml:snakeyaml:1.28")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     implementation("com.squareup.moshi:moshi:1.11.0")
 }
