@@ -2,9 +2,9 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-val majorIntelliJVersion = "191"
+val majorIntelliJVersion = "192"
 group = "edu.illinois.cs.cs125"
-version = "2021.2.0.$majorIntelliJVersion"
+version = "2021.2.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
