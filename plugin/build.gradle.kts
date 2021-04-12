@@ -4,13 +4,13 @@ import java.io.File
 
 val majorIntelliJVersion = "192"
 group = "edu.illinois.cs.cs125"
-version = "2021.2.1.$majorIntelliJVersion"
+version = "2021.4.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.7.1"
+    id("org.jetbrains.intellij") version "0.7.2"
     id("org.jmailen.kotlinter")
 }
 intellij {
@@ -21,15 +21,15 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild(majorIntelliJVersion)
-    untilBuild("203.*")
+    untilBuild("211.*")
 }
 dependencies {
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.11.0")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
 
     implementation(kotlin("stdlib"))
     implementation("org.yaml:snakeyaml:1.28")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
-    implementation("com.squareup.moshi:moshi:1.11.0")
+    implementation("com.squareup.moshi:moshi:1.12.0")
 }
 task("createProperties") {
     doLast {

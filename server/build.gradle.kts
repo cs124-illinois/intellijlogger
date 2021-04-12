@@ -13,22 +13,19 @@ plugins {
     id("org.jmailen.kotlinter")
 }
 dependencies {
-    val ktorVersion = "1.5.1"
-
     implementation(project(":plugin"))
     implementation(kotlin("stdlib"))
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:1.5.3")
     implementation("org.mongodb:mongodb-driver:3.12.8")
-    implementation("io.ktor:ktor-gson:$ktorVersion")
+    implementation("io.ktor:ktor-gson:1.5.3")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("com.uchuhimo:konf-core:1.0.0")
-    implementation("com.uchuhimo:konf-yaml:1.0.0")
-    implementation("io.github.microutils:kotlin-logging:2.0.4")
+    implementation("com.uchuhimo:konf-core:1.1.2")
+    implementation("com.uchuhimo:konf-yaml:1.1.2")
+    implementation("io.github.microutils:kotlin-logging:2.0.6")
 
-    val kotestVersion = "4.4.1"
-    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
-    testImplementation("io.kotest:kotest-assertions-ktor:$kotestVersion")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.kotest:kotest-runner-junit5:4.4.3")
+    testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
+    testImplementation("io.ktor:ktor-server-test-host:1.5.3")
 }
 application {
     @Suppress("DEPRECATION")
