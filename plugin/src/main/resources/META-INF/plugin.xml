@@ -1,10 +1,10 @@
 <idea-plugin>
     <id>edu.illinois.cs.cs125.intellijlogger</id>
-    <name>CS 125 @ Illinois</name>
+    <name>CS 124 @ Illinois</name>
 
-    <vendor email="challen@illinois.edu" url="https://cs125.cs.illinois.edu">CS 125 @ Illinois</vendor>
+    <vendor email="challen@illinois.edu" url="https://cs124.org">CS 124 @ Illinois</vendor>
 
-    <description><![CDATA[ Records MP development for CS 125 @ Illinois. ]]></description>
+    <description><![CDATA[ Records MP development for CS 124 @ Illinois. ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
@@ -23,8 +23,8 @@
     <actions>
         <action id="CS125.ToolbarRunGroup.Grade"
                 class="edu.illinois.cs.cs125.intellijlogger.ButtonAction"
-                description="Initiate CS 125 MP grading"
-                icon="/icons/cs125.png">
+                description="Initiate CS 124 MP grading"
+                icon="/icons/cs124.png">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl G"/>
         </action>
