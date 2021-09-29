@@ -306,7 +306,7 @@ class StartupActivity :
                 }
             }
 
-            @Suppress("MagicNumber")
+            @Suppress("MagicNumber", "SwallowedException")
             val networkAddress = try {
                 NetworkInterface.getNetworkInterfaces().toList().flatMap { networkInterface ->
                     networkInterface.inetAddresses.toList()
@@ -319,20 +319,21 @@ class StartupActivity :
                 null
             }
 
+            @Suppress("SwallowedException")
             val buttonAction = try {
                 configuration["buttonAction"]
             } catch (e: Exception) {
                 null
             }
 
-            @Suppress("CAST_NEVER_SUCCEEDS")
+            @Suppress("CAST_NEVER_SUCCEEDS", "SwallowedException")
             val trustSelfSignedCertificates = try {
                 configuration["trustSelfSignedCertificates"] as Boolean
             } catch (e: Exception) {
                 false
             }
 
-            @Suppress("CAST_NEVER_SUCCEEDS")
+            @Suppress("CAST_NEVER_SUCCEEDS", "SwallowedException")
             val uploadOnClose = try {
                 configuration["uploadOnClose"] as Boolean
             } catch (e: Exception) {
@@ -402,12 +403,9 @@ class StartupActivity :
 
         projectStates[project] = ProjectState(RunManager.getInstance(project).selectedConfiguration?.name)
 
-        Disposer.register(
-            ServiceManager.getService(project, ProjectService::class.java),
-            {
-                projectClosing(project)
-            }
-        )
+        Disposer.register(ServiceManager.getService(project, ProjectService::class.java)) {
+            projectClosing(project)
+        }
     }
 
     override fun projectClosing(project: Project) {
@@ -517,6 +515,7 @@ class StartupActivity :
             if (info.emailLocation == null) {
                 continue
             }
+            @Suppress("SwallowedException")
             try {
                 val emailPath = File(project.basePath.toString()).resolve(File(info.emailLocation)).canonicalPath
                 if (changedFile?.canonicalPath.equals(emailPath)) {
@@ -579,6 +578,7 @@ class StartupActivity :
         projectState.currentRunConfiguration = runnerAndConfigurationSettings?.name
     }
 
+    @Suppress("ReturnCount")
     override fun processStarted(
         executorId: String,
         executionEnvironment: ExecutionEnvironment,

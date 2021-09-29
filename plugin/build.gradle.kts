@@ -2,32 +2,32 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-val majorIntelliJVersion = "192"
+val majorIntelliJVersion = "203"
 group = "edu.illinois.cs.cs125"
-version = "2021.4.0.$majorIntelliJVersion"
+version = "2021.9.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "0.7.2"
+    id("org.jetbrains.intellij") version "1.1.6"
     id("org.jmailen.kotlinter")
 }
 intellij {
-    pluginName = "CS 125 IntelliJ Activity Logger"
-    version = "2020.1"
-    sandboxDirectory = File(projectDir, "sandbox").absolutePath
-    setPlugins("java")
+    pluginName.set("CS 124 IntelliJ Activity Logger")
+    version.set("2020.3")
+    // sandboxDirectory.set(File(projectDir, "sandbox").absolutePath)
+    plugins.set(listOf("java"))
 }
 tasks.patchPluginXml {
-    sinceBuild(majorIntelliJVersion)
-    untilBuild("211.*")
+    sinceBuild.set(majorIntelliJVersion)
+    untilBuild.set("212.*")
 }
 dependencies {
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
 
-    implementation(kotlin("stdlib"))
-    implementation("org.yaml:snakeyaml:1.28")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
+    implementation("org.yaml:snakeyaml:1.29")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     implementation("com.squareup.moshi:moshi:1.12.0")
 }
@@ -50,4 +50,12 @@ task("createProperties") {
 }
 tasks.processResources {
     dependsOn("createProperties")
+}
+kotlin {
+    kotlinDaemonJvmArgs = listOf("-Dfile.encoding=UTF-8", "--illegal-access=permit")
+}
+kapt {
+    javacOptions {
+        option("--illegal-access", "permit")
+    }
 }

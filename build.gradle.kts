@@ -1,16 +1,15 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.4.32"
+    val kotlinVersion = "1.5.31"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("kapt") version kotlinVersion apply false
-    id("org.jmailen.kotlinter") version "3.4.0" apply false
-    id("com.github.ben-manes.versions") version "0.38.0"
-    id("io.gitlab.arturbosch.detekt") version "1.16.0"
+    id("org.jmailen.kotlinter") version "3.6.0" apply false
+    id("com.github.ben-manes.versions") version "0.39.0"
+    id("io.gitlab.arturbosch.detekt") version "1.18.1"
 }
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
     }
     tasks.withType<KotlinCompile> {
