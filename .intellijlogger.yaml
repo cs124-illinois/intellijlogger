@@ -1,4 +1,4 @@
-destination: https://cs125-cloud.cs.illinois.edu/intellijlogger/
+destination: https://cloud.cs124.org/intellijlogger/
 name: intellijlogger
 emailLocation: email.txt
 uploadOnClose: true
