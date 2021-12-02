@@ -3,29 +3,29 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2021.9.0"
+version = "2021.12.0"
 
 plugins {
     kotlin("jvm")
     application
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("com.palantir.docker") version "0.30.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("com.palantir.docker") version "0.31.0"
     id("org.jmailen.kotlinter")
 }
 dependencies {
     implementation(project(":plugin"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation("io.ktor:ktor-server-netty:1.6.3")
+    implementation("io.ktor:ktor-server-netty:1.6.6")
     implementation("org.mongodb:mongodb-driver:3.12.10")
-    implementation("io.ktor:ktor-gson:1.6.3")
-    implementation("ch.qos.logback:logback-classic:1.2.6")
+    implementation("io.ktor:ktor-gson:1.6.6")
+    implementation("ch.qos.logback:logback-classic:1.2.7")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
-    implementation("io.github.microutils:kotlin-logging:2.0.11")
+    implementation("io.github.microutils:kotlin-logging:2.1.0")
 
     testImplementation("io.kotest:kotest-runner-junit5:4.6.3")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:1.6.3")
+    testImplementation("io.ktor:ktor-server-test-host:1.6.6")
 }
 application {
     @Suppress("DEPRECATION")

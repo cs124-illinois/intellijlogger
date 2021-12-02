@@ -4,13 +4,13 @@ import java.io.File
 
 val majorIntelliJVersion = "203"
 group = "edu.illinois.cs.cs125"
-version = "2021.9.1.$majorIntelliJVersion"
+version = "2021.12.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("kapt")
     idea
-    id("org.jetbrains.intellij") version "1.1.6"
+    id("org.jetbrains.intellij") version "1.3.0"
     id("org.jmailen.kotlinter")
 }
 intellij {
@@ -21,7 +21,7 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild.set(majorIntelliJVersion)
-    untilBuild.set("212.*")
+    untilBuild.set("213.*")
 }
 dependencies {
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")

@@ -4,9 +4,9 @@ plugins {
     val kotlinVersion = "1.5.31"
     kotlin("jvm") version kotlinVersion apply false
     kotlin("kapt") version kotlinVersion apply false
-    id("org.jmailen.kotlinter") version "3.6.0" apply false
+    id("org.jmailen.kotlinter") version "3.7.0" apply false
     id("com.github.ben-manes.versions") version "0.39.0"
-    id("io.gitlab.arturbosch.detekt") version "1.18.1"
+    id("io.gitlab.arturbosch.detekt") version "1.19.0"
 }
 allprojects {
     repositories {
