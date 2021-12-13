@@ -11,21 +11,22 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.0"
     id("com.palantir.docker") version "0.31.0"
     id("org.jmailen.kotlinter")
+    id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
     implementation(project(":plugin"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation("io.ktor:ktor-server-netty:1.6.6")
+    implementation("io.ktor:ktor-server-netty:1.6.7")
     implementation("org.mongodb:mongodb-driver:3.12.10")
-    implementation("io.ktor:ktor-gson:1.6.6")
+    implementation("io.ktor:ktor-gson:1.6.7")
     implementation("ch.qos.logback:logback-classic:1.2.7")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
-    implementation("io.github.microutils:kotlin-logging:2.1.0")
+    implementation("io.github.microutils:kotlin-logging:2.1.16")
 
-    testImplementation("io.kotest:kotest-runner-junit5:4.6.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.0.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:1.6.6")
+    testImplementation("io.ktor:ktor-server-test-host:1.6.7")
 }
 application {
     @Suppress("DEPRECATION")

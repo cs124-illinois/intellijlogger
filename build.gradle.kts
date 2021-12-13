@@ -1,9 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.5.31"
-    kotlin("jvm") version kotlinVersion apply false
-    kotlin("kapt") version kotlinVersion apply false
+    kotlin("jvm") version "1.5.31" apply false
+    kotlin("kapt") version "1.5.31" apply false
     id("org.jmailen.kotlinter") version "3.7.0" apply false
     id("com.github.ben-manes.versions") version "0.39.0"
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
@@ -41,7 +40,6 @@ tasks.dependencyUpdates {
     gradleReleaseChannel = "current"
 }
 detekt {
-    input = files("plugin/src/main/kotlin", "server/src/main/kotlin")
     config = files("config/detekt/detekt.yml")
 }
 tasks.register("check") {

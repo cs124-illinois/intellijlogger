@@ -12,6 +12,7 @@ plugins {
     idea
     id("org.jetbrains.intellij") version "1.3.0"
     id("org.jmailen.kotlinter")
+    id("io.gitlab.arturbosch.detekt")
 }
 intellij {
     pluginName.set("CS 124 IntelliJ Activity Logger")
@@ -24,12 +25,12 @@ tasks.patchPluginXml {
     untilBuild.set("213.*")
 }
 dependencies {
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
+    kapt("com.squareup.moshi:moshi-kotlin:1.13.0")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
     implementation("org.yaml:snakeyaml:1.29")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
-    implementation("com.squareup.moshi:moshi:1.12.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
 }
 task("createProperties") {
     doLast {
