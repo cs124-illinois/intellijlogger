@@ -4,11 +4,11 @@ import java.io.File
 
 val majorIntelliJVersion = "203"
 group = "edu.illinois.cs.cs125"
-version = "2021.12.0.$majorIntelliJVersion"
+version = "2021.12.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
+    kotlin("plugin.serialization")
     idea
     id("org.jetbrains.intellij") version "1.3.0"
     id("org.jmailen.kotlinter")
@@ -25,12 +25,10 @@ tasks.patchPluginXml {
     untilBuild.set("213.*")
 }
 dependencies {
-    kapt("com.squareup.moshi:moshi-kotlin:1.13.0")
-
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation("org.yaml:snakeyaml:1.29")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    implementation("org.yaml:snakeyaml:1.30")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
-    implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 }
 task("createProperties") {
     doLast {
@@ -51,12 +49,4 @@ task("createProperties") {
 }
 tasks.processResources {
     dependsOn("createProperties")
-}
-kotlin {
-    kotlinDaemonJvmArgs = listOf("-Dfile.encoding=UTF-8", "--illegal-access=permit")
-}
-kapt {
-    javacOptions {
-        option("--illegal-access", "permit")
-    }
 }

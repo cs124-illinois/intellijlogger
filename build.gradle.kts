@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31" apply false
-    kotlin("kapt") version "1.5.31" apply false
-    id("org.jmailen.kotlinter") version "3.7.0" apply false
+    kotlin("jvm") version "1.6.10" apply false
+    kotlin("plugin.serialization") version "1.6.10" apply false
+    id("org.jmailen.kotlinter") version "3.8.0" apply false
     id("com.github.ben-manes.versions") version "0.39.0"
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
 }
@@ -12,11 +12,8 @@ allprojects {
         mavenCentral()
     }
     tasks.withType<KotlinCompile> {
-        val javaVersion = JavaVersion.VERSION_1_8.toString()
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
         kotlinOptions {
-            jvmTarget = javaVersion
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
         }
     }
 }
@@ -26,17 +23,11 @@ subprojects {
     }
 }
 tasks.dependencyUpdates {
-    resolutionStrategy {
-        componentSelection {
-            all {
-                if (listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap", "release").any { qualifier ->
-                    candidate.version.matches(Regex("(?i).*[.-]$qualifier[.\\d-+]*"))
-                }) {
-                    reject("Release candidate")
-                }
-            }
-        }
-    }
+    fun String.isNonStable() = !(
+        listOf("RELEASE", "FINAL", "GA").any { toUpperCase().contains(it) }
+            || "^[0-9,.v-]+(-r)?$".toRegex().matches(this)
+        )
+    rejectVersionIf { candidate.version.isNonStable() }
     gradleReleaseChannel = "current"
 }
 detekt {

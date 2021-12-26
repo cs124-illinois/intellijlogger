@@ -13,7 +13,7 @@ services:
       - intellijlogger
     environment:
       - "MONGODB=mongodb://mongodb/cs125"
-      - "SEMESTER=Spring2021"
+      - "SEMESTER=Spring2022"
   mongodb:
     image: "bitnami/mongodb:4.4.3"
     logging:

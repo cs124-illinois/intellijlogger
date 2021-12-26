@@ -35,6 +35,8 @@ import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.conn.ssl.NoopHostnameVerifier
@@ -141,7 +143,7 @@ class StartupActivity :
                             break
                         }
                         val counter = state.savedCounters.first()
-                        val json = Counter.adapter.toJson(counter)
+                        val json = Json.encodeToString(counter)
                         if (counter.destination === "console") {
                             log.trace(json)
                             lastUploadFailed = false

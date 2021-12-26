@@ -1,13 +1,10 @@
 package edu.illinois.cs.cs125.intellijlogger
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import edu.illinois.cs.cs125.intellijlogger.moshi.Adapters
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-@JsonClass(generateAdapter = true)
+@Serializable
 data class Counter(
     var destination: String = "",
     var trustSelfSignedCertificates: Boolean = false,
@@ -73,15 +70,9 @@ data class Counter(
     fun isEmpty(): Boolean {
         return totalCount() == 0
     }
-
-    companion object {
-        val adapter: JsonAdapter<Counter> = Moshi.Builder().also { builder ->
-            Adapters.forEach { builder.add(it) }
-        }.build().adapter(Counter::class.java)
-    }
 }
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TestCounter(
     val name: String = "",
     var passed: Int = 0,
@@ -90,10 +81,10 @@ data class TestCounter(
     var interrupted: Int = 0
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class FileInfo(var path: String = "", var lineCount: Int = 0)
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class RunCounter(
     val name: String = "",
     var started: Int = 0
