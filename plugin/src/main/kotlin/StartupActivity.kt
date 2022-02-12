@@ -48,7 +48,9 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
 import org.yaml.snakeyaml.Yaml
 import java.io.File
+import java.net.InetAddress
 import java.net.NetworkInterface
+import java.net.URL
 import java.nio.file.Files
 import java.time.Instant
 import java.util.Properties
@@ -134,6 +136,16 @@ class StartupActivity :
                         log.warn("Previous upload still busy")
                         return
                     }
+                    @Suppress("SwallowedException")
+                    try {
+                        URL("http://www.google.com").openConnection().let {
+                            it.connect()
+                            it.getInputStream().close()
+                        }
+                    } catch (e: Exception) {
+                        log.warn("No connection")
+                        return
+                    }
                     val now = Instant.now().toEpochMilli()
                     uploadBusy = true
 
@@ -157,6 +169,21 @@ class StartupActivity :
                                 ).build()
                             } else {
                                 HttpClientBuilder.create().build()
+                            }
+
+                            @Suppress("SwallowedException")
+                            try {
+                                check(InetAddress.getAllByName(URL(counter.destination).host).isNotEmpty())
+                            } catch (err: Exception) {
+                                log.warn("Skipping destination ${counter.destination} that does not resolve")
+                                synchronized(state.savedCounters) {
+                                    try {
+                                        state.savedCounters.removeAt(0)
+                                    } catch (e: Exception) {
+                                        log.warn("Problem removing head counter: $e")
+                                    }
+                                }
+                                continue
                             }
 
                             val counterPost = HttpPost(counter.destination).also {
@@ -464,13 +491,13 @@ class StartupActivity :
         projectCounter.caretPositionChangedCount++
     }
 
-    /*
-    override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
-        val projectCounter = currentProjectCounters[visibleAreaEvent.editor.project] ?: return
-        log.trace("visibleAreaChanged")
-        projectCounter.visibleAreaChangedCount++
-    }
-    */
+/*
+override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
+    val projectCounter = currentProjectCounters[visibleAreaEvent.editor.project] ?: return
+    log.trace("visibleAreaChanged")
+    projectCounter.visibleAreaChangedCount++
+}
+*/
 
     override fun mousePressed(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return

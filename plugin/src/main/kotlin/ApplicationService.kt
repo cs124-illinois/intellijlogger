@@ -21,7 +21,7 @@ data class ProjectConfiguration(
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.2021.12.2.203.xml"))])
+@State(name = "Component", storages = [(Storage(file = "edu.illinois.cs.cs125.intellijlogger.2022.2.0.203.xml"))])
 class ApplicationService : PersistentStateComponent<ApplicationService.State>, Disposable {
     data class State(
         var activeCounters: MutableList<Counter> = mutableListOf(),

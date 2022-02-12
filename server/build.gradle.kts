@@ -3,13 +3,13 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2021.12.2"
+version = "2022.2.0"
 
 plugins {
     kotlin("jvm")
     application
-    id("com.github.johnrengelman.shadow") version "7.1.1"
-    id("com.palantir.docker") version "0.31.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.palantir.docker") version "0.32.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -24,7 +24,7 @@ dependencies {
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:2.1.21")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.0.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.1.0")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
     testImplementation("io.ktor:ktor-server-test-host:1.6.7")
 }
@@ -34,8 +34,6 @@ application {
 }
 docker {
     name = "cs125/intellijlogger"
-    tag("latest", "cs125/intellijlogger:latest")
-    tag(version.toString(), "cs125/intellijlogger:$version")
     files(tasks["shadowJar"].outputs)
 }
 tasks.test {
