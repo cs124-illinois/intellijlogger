@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.6.10" apply false
     kotlin("plugin.serialization") version "1.6.10" apply false
-    id("org.jmailen.kotlinter") version "3.8.0" apply false
+    id("org.jmailen.kotlinter") version "3.9.0" apply false
     id("com.github.ben-manes.versions") version "0.42.0"
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
 }
