@@ -4,13 +4,13 @@ import java.io.File
 
 val majorIntelliJVersion = "203"
 group = "edu.illinois.cs.cs125"
-version = "2022.2.0.$majorIntelliJVersion"
+version = "2022.4.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij") version "1.4.0"
+    id("org.jetbrains.intellij") version "1.5.3"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -22,10 +22,10 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild.set(majorIntelliJVersion)
-    untilBuild.set("213.*")
+    untilBuild.set("221.*")
 }
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.21")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")

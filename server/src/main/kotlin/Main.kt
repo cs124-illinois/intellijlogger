@@ -12,23 +12,23 @@ import com.mongodb.client.MongoCollection
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.json.toJson
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.CORS
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.XForwardedHeaderSupport
-import io.ktor.features.origin
-import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.routing
+import io.ktor.serialization.gson.gson
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.forwardedheaders.ForwardedHeaders
+import io.ktor.server.plugins.origin
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 import mu.KotlinLogging
 import org.bson.BsonDateTime
 import org.bson.BsonDocument
@@ -60,7 +60,7 @@ val configuration = Config {
 
 val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mongodb].run {
     val uri = MongoClientURI(this)
-    val database = uri.database ?: assert { "MONGO must specify database to use" }
+    val database = uri.database ?: error("MONGO must specify database to use")
     val collection = configuration[TopLevel.mongoCollection]
     MongoClient(uri).getDatabase(database).getCollection(collection, BsonDocument::class.java)
 }
@@ -82,7 +82,7 @@ val gson = Gson()
 
 @Suppress("LongMethod")
 fun Application.intellijlogger() {
-    install(XForwardedHeaderSupport)
+    install(ForwardedHeaders)
     install(CORS) {
         anyHost()
         allowNonSimpleContentTypes = true
@@ -166,24 +166,7 @@ fun Application.intellijlogger() {
 
 fun main() {
     logger.info(configuration.toJson.toText())
-
     val uri = URI(configuration[TopLevel.http])
     assert(uri.scheme == "http")
-
     embeddedServer(Netty, host = uri.host, port = uri.port, module = Application::intellijlogger).start(wait = true)
-}
-
-@Suppress("unused")
-fun assert(block: () -> String): Nothing {
-    throw AssertionError(block())
-}
-
-@Suppress("unused")
-fun check(block: () -> String): Nothing {
-    throw IllegalStateException(block())
-}
-
-@Suppress("unused")
-fun require(block: () -> String): Nothing {
-    throw IllegalArgumentException(block())
 }
