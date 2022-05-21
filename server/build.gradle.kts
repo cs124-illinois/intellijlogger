@@ -3,7 +3,7 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2022.4.0"
+version = "2022.5.0"
 
 plugins {
     kotlin("jvm")
@@ -25,9 +25,9 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
-    implementation("io.github.microutils:kotlin-logging:2.1.21")
+    implementation("io.github.microutils:kotlin-logging:2.1.23")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.2.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.3.0")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
     testImplementation("io.ktor:ktor-server-test-host:2.0.1")
 }
