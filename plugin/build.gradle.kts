@@ -4,13 +4,13 @@ import java.io.File
 
 val majorIntelliJVersion = "203"
 group = "edu.illinois.cs.cs125"
-version = "2022.5.0.$majorIntelliJVersion"
+version = "2022.6.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij") version "1.5.3"
+    id("org.jetbrains.intellij") version "1.6.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
