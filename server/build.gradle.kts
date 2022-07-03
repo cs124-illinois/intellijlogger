@@ -3,33 +3,33 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2022.6.0"
+version = "2022.7.0"
 
 plugins {
     kotlin("jvm")
     application
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("com.palantir.docker") version "0.33.0"
+    id("com.palantir.docker") version "0.34.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
     implementation(project(":plugin"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-    implementation("io.ktor:ktor-server-netty:2.0.2")
-    implementation("io.ktor:ktor-server-forwarded-header:2.0.2")
-    implementation("io.ktor:ktor-server-cors:2.0.2")
-    implementation("io.ktor:ktor-server-content-negotiation:2.0.2")
+    implementation("io.ktor:ktor-server-netty:2.0.3")
+    implementation("io.ktor:ktor-server-forwarded-header:2.0.3")
+    implementation("io.ktor:ktor-server-cors:2.0.3")
+    implementation("io.ktor:ktor-server-content-negotiation:2.0.3")
     implementation("org.mongodb:mongodb-driver:3.12.11")
-    implementation("io.ktor:ktor-serialization-gson:2.0.2")
+    implementation("io.ktor:ktor-serialization-gson:2.0.3")
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:2.1.23")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.3.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.3.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.0.2")
+    testImplementation("io.ktor:ktor-server-test-host:2.0.3")
 }
 application {
     @Suppress("DEPRECATION")
@@ -37,6 +37,8 @@ application {
 }
 docker {
     name = "cs125/intellijlogger"
+    @Suppress("DEPRECATION")
+    tags("latest")
     files(tasks["shadowJar"].outputs)
 }
 tasks.test {

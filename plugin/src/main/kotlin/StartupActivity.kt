@@ -126,7 +126,8 @@ class StartupActivity :
         val currentCount = state.savedCounters.size
 
         val uploadCounterTask = object : Task.Backgroundable(
-            null, "Uploading logs...",
+            null,
+            "Uploading logs...",
             false
         ) {
             @Suppress("LongMethod")

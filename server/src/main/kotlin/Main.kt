@@ -109,7 +109,6 @@ fun Application.intellijlogger() {
             currentStatus.statusCount++
         }
         post("/") {
-
             @Suppress("TooGenericExceptionCaught")
             val upload = try {
                 call.receive<JsonObject>()
