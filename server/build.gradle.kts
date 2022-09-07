@@ -3,7 +3,7 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2022.7.0"
+version = "2022.9.0"
 
 plugins {
     kotlin("jvm")
@@ -16,20 +16,20 @@ plugins {
 dependencies {
     implementation(project(":plugin"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-    implementation("io.ktor:ktor-server-netty:2.0.3")
-    implementation("io.ktor:ktor-server-forwarded-header:2.0.3")
-    implementation("io.ktor:ktor-server-cors:2.0.3")
-    implementation("io.ktor:ktor-server-content-negotiation:2.0.3")
+    implementation("io.ktor:ktor-server-netty:2.1.1")
+    implementation("io.ktor:ktor-server-forwarded-header:2.1.1")
+    implementation("io.ktor:ktor-server-cors:2.1.1")
+    implementation("io.ktor:ktor-server-content-negotiation:2.1.1")
     implementation("org.mongodb:mongodb-driver:3.12.11")
-    implementation("io.ktor:ktor-serialization-gson:2.0.3")
-    implementation("ch.qos.logback:logback-classic:1.2.11")
+    implementation("io.ktor:ktor-serialization-gson:2.1.1")
+    implementation("ch.qos.logback:logback-classic:1.4.0")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:2.1.23")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.3.2")
+    testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.0.3")
+    testImplementation("io.ktor:ktor-server-test-host:2.1.1")
 }
 application {
     @Suppress("DEPRECATION")
