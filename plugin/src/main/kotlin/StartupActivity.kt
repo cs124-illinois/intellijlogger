@@ -35,6 +35,7 @@ import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.commons.httpclient.HttpStatus
@@ -72,6 +73,7 @@ private const val SHORTEST_UPLOAD_WAIT = 5 * 60 * 1000 // 5 minutes
 private const val SHORTEST_UPLOAD_INTERVAL = 10 * 60 * 1000 // 10 minutes
 private const val SECONDS_TO_MILLISECONDS = 1000L
 
+@ExperimentalSerializationApi
 @Suppress("TooManyFunctions")
 class StartupActivity :
     StartupActivity,
@@ -316,7 +318,6 @@ class StartupActivity :
         }
 
         val projectConfiguration = try {
-            @Suppress("UNCHECKED_CAST")
             val configuration = Yaml().load(Files.newBufferedReader(configurationFile.toPath())) as Map<String, String>
 
             val destination = configuration["destination"]
@@ -356,16 +357,16 @@ class StartupActivity :
                 null
             }
 
-            @Suppress("CAST_NEVER_SUCCEEDS", "SwallowedException")
+            @Suppress("SwallowedException")
             val trustSelfSignedCertificates = try {
-                configuration["trustSelfSignedCertificates"] as Boolean
+                configuration["trustSelfSignedCertificates"].toBoolean()
             } catch (e: Exception) {
                 false
             }
 
-            @Suppress("CAST_NEVER_SUCCEEDS", "SwallowedException")
+            @Suppress("SwallowedException")
             val uploadOnClose = try {
-                configuration["uploadOnClose"] as Boolean
+                configuration["uploadOnClose"].toBoolean()
             } catch (e: Exception) {
                 false
             }

@@ -2,7 +2,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-val majorIntelliJVersion = "203"
+val majorIntelliJVersion = "211"
 group = "edu.illinois.cs.cs125"
 version = "2022.9.0.$majorIntelliJVersion"
 
@@ -16,7 +16,7 @@ plugins {
 }
 intellij {
     pluginName.set("CS 124 IntelliJ Activity Logger")
-    version.set("2020.3")
+    version.set("2021.1")
     // sandboxDirectory.set(File(projectDir, "sandbox").absolutePath)
     plugins.set(listOf("java"))
 }
