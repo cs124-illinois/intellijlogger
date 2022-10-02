@@ -25,7 +25,7 @@ tasks.patchPluginXml {
     untilBuild.set("222.*")
 }
 dependencies {
-    implementation("org.yaml:snakeyaml:1.31")
+    implementation("org.yaml:snakeyaml:1.32")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
 }

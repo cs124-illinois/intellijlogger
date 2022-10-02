@@ -22,10 +22,10 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:2.1.1")
     implementation("org.mongodb:mongodb-driver:3.12.11")
     implementation("io.ktor:ktor-serialization-gson:2.1.1")
-    implementation("ch.qos.logback:logback-classic:1.4.0")
+    implementation("ch.qos.logback:logback-classic:1.4.1")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
-    implementation("io.github.microutils:kotlin-logging:2.1.23")
+    implementation("io.github.microutils:kotlin-logging:3.0.0")
 
     testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
