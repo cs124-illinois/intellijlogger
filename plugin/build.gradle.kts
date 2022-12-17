@@ -4,13 +4,13 @@ import java.io.File
 
 val majorIntelliJVersion = "211"
 group = "edu.illinois.cs.cs125"
-version = "2022.10.0.$majorIntelliJVersion"
+version = "2022.12.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.intellij") version "1.11.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -22,12 +22,15 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild.set(majorIntelliJVersion)
-    untilBuild.set("222.*")
+    untilBuild.set("223.*")
+}
+java {
+    targetCompatibility = JavaVersion.VERSION_11
 }
 dependencies {
     implementation("org.yaml:snakeyaml:1.33")
-    implementation("org.apache.httpcomponents:httpclient:4.5.13")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 }
 task("createProperties") {
     doLast {
