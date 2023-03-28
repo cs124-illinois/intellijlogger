@@ -97,7 +97,7 @@ class StartupActivity :
     }
 
     data class ProjectState(
-        var currentRunConfiguration: String?
+        var currentRunConfiguration: String?,
     )
 
     private val projectStates = mutableMapOf<Project, ProjectState>()
@@ -130,7 +130,7 @@ class StartupActivity :
         val uploadCounterTask = object : Task.Backgroundable(
             null,
             "Uploading logs...",
-            false
+            false,
         ) {
             @Suppress("LongMethod")
             override fun run(progressIndicator: ProgressIndicator) {
@@ -167,8 +167,8 @@ class StartupActivity :
                                 HttpClients.custom().setSSLSocketFactory(
                                     SSLConnectionSocketFactory(
                                         SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy()).build(),
-                                        NoopHostnameVerifier()
-                                    )
+                                        NoopHostnameVerifier(),
+                                    ),
                                 ).build()
                             } else {
                                 HttpClientBuilder.create().build()
@@ -280,7 +280,7 @@ class StartupActivity :
                     projectConfigurations[project]?.email,
                     projectConfigurations[project]?.networkAddress,
                     version,
-                    intellijVersion
+                    intellijVersion,
                 )
                 currentProjectCounters[project] = newCounter
 
@@ -378,7 +378,7 @@ class StartupActivity :
                 networkAddress,
                 buttonAction,
                 trustSelfSignedCertificates,
-                uploadOnClose
+                uploadOnClose,
             )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
@@ -401,7 +401,7 @@ class StartupActivity :
             projectConfiguration.email,
             projectConfiguration.networkAddress,
             version,
-            intellijVersion
+            intellijVersion,
         )
         newCounter.opened = true
         currentProjectCounters[project] = newCounter
@@ -413,7 +413,7 @@ class StartupActivity :
                 "edu.illinois.cs.cs125",
                 true,
                 STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS,
-                STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS
+                STATE_TIMER_PERIOD_SEC * SECONDS_TO_MILLISECONDS,
             ) {
                 rotateCounters()
             }
@@ -613,7 +613,7 @@ override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
     override fun processStarted(
         executorId: String,
         executionEnvironment: ExecutionEnvironment,
-        processHandler: ProcessHandler
+        processHandler: ProcessHandler,
     ) {
         val projectCounter = currentProjectCounters[executionEnvironment.project] ?: return
         val projectState = projectStates[executionEnvironment.project] ?: return
@@ -626,7 +626,7 @@ override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
         }
         val runCounter =
             projectCounter.runCounts.find { it.name === projectState.currentRunConfiguration } ?: RunCounter(
-                projectState.currentRunConfiguration!!
+                projectState.currentRunConfiguration!!,
             ).also {
                 projectCounter.runCounts.add(it)
             }

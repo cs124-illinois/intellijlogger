@@ -44,7 +44,7 @@ data class Counter(
     var openFileCount: Int = 0,
     var selectedFile: String = "",
     var opened: Boolean = false,
-    var closed: Boolean = true
+    var closed: Boolean = true,
 ) {
     fun totalCount(): Int {
         return keystrokeCount +
@@ -78,7 +78,7 @@ data class TestCounter(
     var passed: Int = 0,
     var failed: Int = 0,
     var ignored: Int = 0,
-    var interrupted: Int = 0
+    var interrupted: Int = 0,
 )
 
 @Serializable
@@ -87,5 +87,5 @@ data class FileInfo(var path: String = "", var lineCount: Int = 0)
 @Serializable
 data class RunCounter(
     val name: String = "",
-    var started: Int = 0
+    var started: Int = 0,
 )

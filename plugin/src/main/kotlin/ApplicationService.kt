@@ -17,11 +17,11 @@ data class ProjectConfiguration(
     val networkAddress: String?,
     val buttonAction: String?,
     val trustSelfSignedCertificates: Boolean,
-    val uploadOnClose: Boolean
+    val uploadOnClose: Boolean,
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2023.2.0.211.xml"))])
+@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2023.3.0.211.xml"))])
 class ApplicationService : PersistentStateComponent<ApplicationService.State>, Disposable {
     data class State(
         var activeCounters: MutableList<Counter> = mutableListOf(),
@@ -30,7 +30,7 @@ class ApplicationService : PersistentStateComponent<ApplicationService.State>, D
         @Suppress("ConstructorParameterNaming")
         var UUID: String = "",
         var lastSave: Long = -1,
-        val pluginVersion: String = version
+        val pluginVersion: String = version,
     )
 
     var currentProjectCounters = mutableMapOf<Project, Counter>()

@@ -17,7 +17,7 @@ class TestStatusHandler : TestStatusListener() {
             return
         }
         val testCounter = projectCounter.testCounts.find { it.name === abstractTestProxy.name } ?: TestCounter(
-            abstractTestProxy.name
+            abstractTestProxy.name,
         ).also {
             projectCounter.testCounts.add(it)
         }

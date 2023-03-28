@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.8.10" apply false
     kotlin("plugin.serialization") version "1.8.10" apply false
-    id("org.jmailen.kotlinter") version "3.13.0" apply false
+    id("org.jmailen.kotlinter") version "3.14.0" apply false
     id("com.github.ben-manes.versions") version "0.46.0"
     id("io.gitlab.arturbosch.detekt") version "1.22.0"
 }
@@ -27,7 +27,7 @@ subprojects {
 }
 tasks.dependencyUpdates {
     fun String.isNonStable() = !(
-        listOf("RELEASE", "FINAL", "GA").any { toUpperCase().contains(it) }
+        listOf("RELEASE", "FINAL", "GA").any { uppercase().contains(it) }
             || "^[0-9,.v-]+(-r)?$".toRegex().matches(this)
         )
     rejectVersionIf { candidate.version.isNonStable() }

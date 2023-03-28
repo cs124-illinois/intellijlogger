@@ -95,11 +95,11 @@ fun Application.intellijlogger() {
                     override fun serialize(
                         instant: Instant?,
                         typeOfSrc: Type?,
-                        context: JsonSerializationContext?
+                        context: JsonSerializationContext?,
                     ): JsonElement {
                         return JsonPrimitive(instant.toString())
                     }
-                }
+                },
             )
         }
     }

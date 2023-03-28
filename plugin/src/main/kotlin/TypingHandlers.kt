@@ -45,7 +45,7 @@ class Enter : EnterHandlerDelegate {
         caretOffset: Ref<Int>,
         caretAdvance: Ref<Int>,
         dataContext: DataContext,
-        originalHandler: EditorActionHandler?
+        originalHandler: EditorActionHandler?,
     ): EnterHandlerDelegate.Result {
         return EnterHandlerDelegate.Result.Continue
     }
@@ -53,7 +53,7 @@ class Enter : EnterHandlerDelegate {
     override fun postProcessEnter(
         file: PsiFile,
         editor: Editor,
-        dataContext: DataContext
+        dataContext: DataContext,
     ): EnterHandlerDelegate.Result {
         countCharacter(editor.project)
         return EnterHandlerDelegate.Result.Continue
