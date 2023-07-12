@@ -3,31 +3,31 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2023.3.0"
+version = "2023.7.0"
 
 plugins {
     kotlin("jvm")
     application
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
     implementation(project(":plugin"))
-    implementation("io.ktor:ktor-server-netty:2.2.4")
-    implementation("io.ktor:ktor-server-forwarded-header:2.2.4")
-    implementation("io.ktor:ktor-server-cors:2.2.4")
-    implementation("io.ktor:ktor-server-content-negotiation:2.2.4")
-    implementation("org.mongodb:mongodb-driver:3.12.12")
-    implementation("io.ktor:ktor-serialization-gson:2.2.4")
-    implementation("ch.qos.logback:logback-classic:1.4.6")
+    implementation("io.ktor:ktor-server-netty:2.3.2")
+    implementation("io.ktor:ktor-server-forwarded-header:2.3.2")
+    implementation("io.ktor:ktor-server-cors:2.3.2")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.2")
+    implementation("org.mongodb:mongodb-driver:3.12.14")
+    implementation("io.ktor:ktor-serialization-gson:2.3.2")
+    implementation("ch.qos.logback:logback-classic:1.4.8")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
+    testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.2.4")
+    testImplementation("io.ktor:ktor-server-test-host:2.3.2")
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
