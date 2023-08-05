@@ -4,7 +4,7 @@ import java.io.File
 
 val majorIntelliJVersion = "211"
 group = "edu.illinois.cs.cs125"
-version = "2023.7.1.$majorIntelliJVersion"
+version = "2023.8.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -28,7 +28,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 dependencies {
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation("org.yaml:snakeyaml:2.1")
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 }

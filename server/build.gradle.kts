@@ -3,7 +3,7 @@ import java.io.StringWriter
 import java.io.File
 
 group = "edu.illinois.cs.cs125"
-version = "2023.7.1"
+version = "2023.8.0"
 
 plugins {
     kotlin("jvm")
@@ -14,20 +14,20 @@ plugins {
 }
 dependencies {
     implementation(project(":plugin"))
-    implementation("io.ktor:ktor-server-netty:2.3.2")
-    implementation("io.ktor:ktor-server-forwarded-header:2.3.2")
-    implementation("io.ktor:ktor-server-cors:2.3.2")
-    implementation("io.ktor:ktor-server-content-negotiation:2.3.2")
+    implementation("io.ktor:ktor-server-netty:2.3.3")
+    implementation("io.ktor:ktor-server-forwarded-header:2.3.3")
+    implementation("io.ktor:ktor-server-cors:2.3.3")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.3")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("io.ktor:ktor-serialization-gson:2.3.2")
-    implementation("ch.qos.logback:logback-classic:1.4.8")
+    implementation("io.ktor:ktor-serialization-gson:2.3.3")
+    implementation("ch.qos.logback:logback-classic:1.4.9")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
     testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.3.2")
+    testImplementation("io.ktor:ktor-server-test-host:2.3.3")
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
