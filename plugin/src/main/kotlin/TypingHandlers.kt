@@ -12,11 +12,9 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiFile
 
 private fun countCharacter(project: Project?) {
-    project?.counters()?.let { counters ->
+    getCounters(project)?.let { counters ->
         log.trace("countCharacter (${counters.keystrokeCount})")
         counters.keystrokeCount++
-    } ?: run {
-        log.warn("can't get counters for project")
     }
 }
 

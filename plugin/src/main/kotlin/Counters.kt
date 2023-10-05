@@ -8,7 +8,7 @@ import java.time.Instant
 data class Counter(
     var destination: String = "",
     var trustSelfSignedCertificates: Boolean = false,
-    @Suppress("ConstructorParameterNaming") var UUID: String = "",
+    @Suppress("ConstructorParameterNaming", "PropertyName") var UUID: String = "",
     var index: Long = 0,
     var previousIndex: Long = -1,
     var name: String? = null,

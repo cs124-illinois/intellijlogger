@@ -1,3 +1,5 @@
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package edu.illinois.cs.cs125.intellijlogger
 
 import com.intellij.execution.ExecutionListener
@@ -12,7 +14,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.compiler.CompilationStatusListener
 import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerTopics
-import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.CaretEvent
@@ -38,7 +40,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.apache.commons.httpclient.HttpStatus
+import org.apache.http.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
@@ -88,13 +90,16 @@ class StartupActivity :
     RunManagerListener,
     ExecutionListener {
 
-    private val currentProjectCounters by lazy {
-        ServiceManager.getService(ApplicationService::class.java).currentProjectCounters
-    }
+    private val currentProjectCounters
+        get() = service<ApplicationService>().projectCounters
 
-    private val projectConfigurations by lazy {
-        ServiceManager.getService(ApplicationService::class.java).projectConfigurations
-    }
+    private val projectConfigurations
+        get() = service<ApplicationService>().projectConfigurations
+
+    private val applicationService
+        get() = service<ApplicationService>()
+    private val state
+        get() = service<ApplicationService>()._state
 
     data class ProjectState(
         var currentRunConfiguration: String?,
@@ -116,7 +121,6 @@ class StartupActivity :
             return
         }
 
-        val state = ApplicationService.getInstance()._state
         if (state.savedCounters.size == 0) {
             log.trace("No counters to upload")
             return
@@ -159,7 +163,7 @@ class StartupActivity :
                         }
                         val counter = state.savedCounters.first()
                         val json = Json.encodeToString(counter)
-                        if (counter.destination === "console") {
+                        if (counter.destination == "console") {
                             log.trace(json)
                             lastUploadFailed = false
                         } else {
@@ -233,7 +237,6 @@ class StartupActivity :
     fun rotateCounters() {
         log.trace("rotateCounters")
 
-        val state = ApplicationService.getInstance()._state
         val end = Instant.now().toEpochMilli()
 
         if (currentProjectCounters.values.none { !it.isEmpty() }) {
@@ -388,9 +391,6 @@ class StartupActivity :
         log.trace(projectConfiguration.toString())
         projectConfigurations[project] = projectConfiguration
 
-        val stateService = ApplicationService.getInstance()
-        val state = stateService._state
-
         val newCounter = Counter(
             projectConfiguration.destination,
             projectConfiguration.trustSelfSignedCertificates,
@@ -418,11 +418,11 @@ class StartupActivity :
                 rotateCounters()
             }
             ApplicationManager.getApplication().invokeLater {
-                EditorFactory.getInstance().eventMulticaster.addCaretListener(this, stateService)
+                EditorFactory.getInstance().eventMulticaster.addCaretListener(this, applicationService)
                 // EditorFactory.getInstance().eventMulticaster.addVisibleAreaListener(this, this)
-                EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, stateService)
-                EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, stateService)
-                EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, stateService)
+                EditorFactory.getInstance().eventMulticaster.addEditorMouseListener(this, applicationService)
+                EditorFactory.getInstance().eventMulticaster.addSelectionListener(this, applicationService)
+                EditorFactory.getInstance().eventMulticaster.addDocumentListener(this, applicationService)
             }
         }
         uploadCounters()
@@ -434,7 +434,7 @@ class StartupActivity :
 
         projectStates[project] = ProjectState(RunManager.getInstance(project).selectedConfiguration?.name)
 
-        Disposer.register(ServiceManager.getService(project, ProjectService::class.java)) {
+        Disposer.register(project.getService(ProjectService::class.java)) {
             projectClosing(project)
         }
     }
@@ -443,7 +443,6 @@ class StartupActivity :
         log.info("projectClosing")
 
         val currentCounter = currentProjectCounters[project] ?: return
-        val state = ApplicationService.getInstance()._state
 
         // We save this counter regardless of whether it has counts just to mark the end of a session
         currentCounter.end = Instant.now().toEpochMilli()

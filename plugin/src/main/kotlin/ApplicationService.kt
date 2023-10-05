@@ -1,10 +1,12 @@
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package edu.illinois.cs.cs125.intellijlogger
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import java.time.Instant
 import java.util.UUID
@@ -21,20 +23,19 @@ data class ProjectConfiguration(
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2023.8.0.211.xml"))])
+@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2023.10.0.223.xml"))])
 class ApplicationService : PersistentStateComponent<ApplicationService.State>, Disposable {
     data class State(
         var activeCounters: MutableList<Counter> = mutableListOf(),
         var savedCounters: MutableList<Counter> = mutableListOf(),
         var counterIndex: Long = 0L,
-        @Suppress("ConstructorParameterNaming")
+        @Suppress("ConstructorParameterNaming", "PropertyName")
         var UUID: String = "",
         var lastSave: Long = -1,
         val pluginVersion: String = version,
     )
 
-    var currentProjectCounters = mutableMapOf<Project, Counter>()
-
+    var projectCounters = mutableMapOf<Project, Counter>()
     val projectConfigurations = mutableMapOf<Project, ProjectConfiguration>()
 
     override fun initializeComponent() {
@@ -78,21 +79,22 @@ class ApplicationService : PersistentStateComponent<ApplicationService.State>, D
         _state = state
     }
 
-    companion object {
-        fun getInstance(): ApplicationService {
-            return ServiceManager.getService(ApplicationService::class.java)
-        }
-    }
-
     override fun dispose() {
         return
     }
 }
 
-fun Project.counters(): Counter? {
-    return ServiceManager.getService(ApplicationService::class.java).currentProjectCounters[this]
+fun getCounters(project: Project?) = project?.let {
+    service<ApplicationService>().projectCounters[project]
+}.also { counter ->
+    if (project != null && counter == null) {
+        log.warn("can't get counters for project")
+    }
 }
-
-fun Project.configuration(): ProjectConfiguration? {
-    return ServiceManager.getService(ApplicationService::class.java).projectConfigurations[this]
+fun getConfiguration(project: Project?) = project?.let {
+    service<ApplicationService>().projectConfigurations[project]
+}.also { configuration ->
+    if (project != null && configuration == null) {
+        log.warn("can't get configuration for project")
+    }
 }

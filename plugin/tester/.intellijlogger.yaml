@@ -1,4 +1,4 @@
-destination: http://localhost:8818/
+destination: http://localhost:8888/
 name: "intellijlogger:tester"
 emailLocation: email.txt
 buttonAction: "Grade.*"

@@ -1,3 +1,4 @@
+
 package edu.illinois.cs.cs125.intellijlogger
 
 import com.intellij.execution.testframework.AbstractTestProxy
@@ -34,11 +35,9 @@ class TestStatusHandler : TestStatusListener() {
         if (abstractTestProxy == null) {
             return
         }
-        project?.counters()?.let { counters ->
+        getCounters(project)?.let { counters ->
             log.trace("testSuiteFinished")
             countTests(abstractTestProxy, counters)
-        } ?: run {
-            log.warn("can't get counters for project")
         }
     }
 }

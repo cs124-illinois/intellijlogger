@@ -16,3 +16,4 @@ test-output/
 /plugin/sandbox/
 .DS_Store
 /email.txt
+.env*

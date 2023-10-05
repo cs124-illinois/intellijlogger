@@ -2,8 +2,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-group = "edu.illinois.cs.cs125"
-version = "2023.8.0"
+version = "2023.10.0"
 
 plugins {
     kotlin("jvm")
@@ -14,20 +13,20 @@ plugins {
 }
 dependencies {
     implementation(project(":plugin"))
-    implementation("io.ktor:ktor-server-netty:2.3.3")
-    implementation("io.ktor:ktor-server-forwarded-header:2.3.3")
-    implementation("io.ktor:ktor-server-cors:2.3.3")
-    implementation("io.ktor:ktor-server-content-negotiation:2.3.3")
+    implementation("io.ktor:ktor-server-netty:2.3.4")
+    implementation("io.ktor:ktor-server-forwarded-header:2.3.4")
+    implementation("io.ktor:ktor-server-cors:2.3.4")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.4")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("io.ktor:ktor-serialization-gson:2.3.3")
-    implementation("ch.qos.logback:logback-classic:1.4.9")
+    implementation("io.ktor:ktor-serialization-gson:2.3.4")
+    implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
+    testImplementation("io.kotest:kotest-runner-junit5:5.7.2")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.3.3")
+    testImplementation("io.ktor:ktor-server-test-host:2.3.4")
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
@@ -35,15 +34,15 @@ application {
 val dockerName = "cs124/intellijlogger"
 tasks.register<Copy>("dockerCopyJar") {
     from(tasks["shadowJar"].outputs)
-    into("${buildDir}/docker")
+    into(layout.buildDirectory.dir("docker"))
 }
 tasks.register<Copy>("dockerCopyDockerfile") {
     from("${projectDir}/Dockerfile")
-    into("${buildDir}/docker")
+    into(layout.buildDirectory.dir("docker"))
 }
 tasks.register<Exec>("dockerBuild") {
     dependsOn("dockerCopyJar", "dockerCopyDockerfile")
-    workingDir("${buildDir}/docker")
+    workingDir(layout.buildDirectory.dir("docker"))
     environment("DOCKER_BUILDKIT", "1")
     commandLine(
         ("docker build . " +
@@ -53,7 +52,7 @@ tasks.register<Exec>("dockerBuild") {
 }
 tasks.register<Exec>("dockerPush") {
     dependsOn("dockerCopyJar", "dockerCopyDockerfile")
-    workingDir("${buildDir}/docker")
+    workingDir(layout.buildDirectory.dir("docker"))
     commandLine(
         ("docker buildx build . --platform=linux/amd64,linux/arm64/v8 " +
             "--builder multiplatform " +
@@ -85,4 +84,9 @@ task("createProperties") {
 }
 tasks.processResources {
     dependsOn("createProperties")
+}
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
