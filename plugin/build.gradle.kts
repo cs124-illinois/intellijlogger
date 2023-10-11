@@ -11,7 +11,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij") version "1.15.0"
+    id("org.jetbrains.intellij") version "1.16.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
