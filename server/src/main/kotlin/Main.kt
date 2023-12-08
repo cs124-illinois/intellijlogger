@@ -1,6 +1,7 @@
 package edu.illinois.cs.cs125.intellijlogger.server
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
@@ -11,16 +12,13 @@ import com.mongodb.MongoClientURI
 import com.mongodb.client.MongoCollection
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
-import com.uchuhimo.konf.source.json.toJson
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.gson.gson
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.forwardedheaders.ForwardedHeaders
 import io.ktor.server.plugins.origin
@@ -33,10 +31,14 @@ import mu.KotlinLogging
 import org.bson.BsonDateTime
 import org.bson.BsonDocument
 import org.bson.BsonString
+import java.io.BufferedReader
+import java.io.ByteArrayInputStream
+import java.io.InputStreamReader
 import java.lang.reflect.Type
 import java.net.URI
 import java.time.Instant
 import java.util.Properties
+import java.util.zip.GZIPInputStream
 
 @Suppress("UNUSED")
 private val logger = KotlinLogging.logger {}
@@ -66,19 +68,35 @@ val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mong
 }
 
 @Suppress("unused")
-class Status {
-    var name: String = NAME
-    var version: String = VERSION
-    var upSince: Instant = Instant.now()
-    var statusCount: Int = 0
-    var uploadCount: Int = 0
-    var failureCount: Int = 0
+data class Status(
+    var name: String = NAME,
+    var version: String = VERSION,
+    var upSince: Instant = Instant.now(),
+    var statusCount: Int = 0,
+    var uploadCount: Int = 0,
+    var receivedCount: Int = 0,
+    var compressedCount: Int = 0,
+    var failureCount: Int = 0,
     var lastUpload: Instant? = null
-}
+)
 
 val currentStatus = Status()
 
-val gson = Gson()
+val gson: Gson = GsonBuilder()
+    .setPrettyPrinting()
+    .registerTypeAdapter(Instant::class.java,
+        object : JsonSerializer<Instant> {
+            override fun serialize(
+                instant: Instant?,
+                typeOfSrc: Type?,
+                context: JsonSerializationContext?,
+            ): JsonElement {
+                return JsonPrimitive(instant.toString())
+            }
+        }).create()
+
+fun ByteArray.decompress() = BufferedReader(InputStreamReader(GZIPInputStream(ByteArrayInputStream(this)), "UTF-8"))
+    .use(BufferedReader::readText)
 
 @Suppress("LongMethod")
 fun Application.intellijlogger() {
@@ -87,31 +105,28 @@ fun Application.intellijlogger() {
         anyHost()
         allowNonSimpleContentTypes = true
     }
-    install(ContentNegotiation) {
-        gson {
-            registerTypeAdapter(
-                Instant::class.java,
-                object : JsonSerializer<Instant> {
-                    override fun serialize(
-                        instant: Instant?,
-                        typeOfSrc: Type?,
-                        context: JsonSerializationContext?,
-                    ): JsonElement {
-                        return JsonPrimitive(instant.toString())
-                    }
-                },
-            )
-        }
-    }
     routing {
         get("/") {
-            call.respond(currentStatus)
+            call.respond(gson.toJson(currentStatus))
             currentStatus.statusCount++
+        }
+        get("/version") {
+            call.respond(VERSION)
         }
         post("/") {
             @Suppress("TooGenericExceptionCaught")
             val upload = try {
-                call.receive<JsonObject>()
+                call.receive<ByteArray>().let { bytes ->
+                    when (call.request.headers["content-encoding"].equals("gzip", true)) {
+                        true -> bytes.decompress().also {
+                            currentStatus.compressedCount++
+                        }
+
+                        false -> bytes.toString()
+                    }
+                }.let { string ->
+                    gson.fromJson<JsonObject>(string, JsonObject::class.java)
+                }
             } catch (e: Exception) {
                 logger.warn { "couldn't deserialize counters: $e" }
                 call.respond(HttpStatusCode.BadRequest)
@@ -130,6 +145,7 @@ fun Application.intellijlogger() {
                 } else {
                     listOf(upload)
                 }
+                currentStatus.receivedCount++
                 counters.map { counter ->
                     BsonDocument.parse(gson.toJson(counter))
                         .append("receivedVersion", BsonString(VERSION))
@@ -164,8 +180,7 @@ fun Application.intellijlogger() {
 }
 
 fun main() {
-    logger.info(configuration.toJson.toText())
     val uri = URI(configuration[TopLevel.http])
-    assert(uri.scheme == "http")
+    check(uri.scheme == "http")
     embeddedServer(Netty, host = uri.host, port = uri.port, module = Application::intellijlogger).start(wait = true)
 }

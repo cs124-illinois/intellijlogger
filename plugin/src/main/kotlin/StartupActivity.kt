@@ -40,24 +40,27 @@ import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.apache.http.HttpStatus
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.ssl.SSLContextBuilder
 import org.yaml.snakeyaml.Yaml
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.NetworkInterface
+import java.net.URI
 import java.net.URL
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.file.Files
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.time.Instant
 import java.util.Properties
 import java.util.Timer
+import java.util.zip.GZIPOutputStream
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.timer
 
 val log = Logger.getInstance("edu.illinois.cs.cs125.intellijlogger")
@@ -167,15 +170,9 @@ class StartupActivity :
                             log.trace(json)
                             lastUploadFailed = false
                         } else {
-                            val httpClient = if (counter.trustSelfSignedCertificates) {
-                                HttpClients.custom().setSSLSocketFactory(
-                                    SSLConnectionSocketFactory(
-                                        SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy()).build(),
-                                        NoopHostnameVerifier(),
-                                    ),
-                                ).build()
-                            } else {
-                                HttpClientBuilder.create().build()
+                            val httpClient = when (counter.trustSelfSignedCertificates) {
+                                true -> HttpClient.newBuilder().sslContext(trustAllCerts).build()
+                                else -> HttpClient.newHttpClient()
                             }
 
                             @Suppress("SwallowedException")
@@ -193,15 +190,17 @@ class StartupActivity :
                                 continue
                             }
 
-                            val counterPost = HttpPost(counter.destination).also {
-                                it.addHeader("content-type", "application/json")
-                                it.entity = StringEntity(json)
-                            }
+                            val counterPost = HttpRequest.newBuilder()
+                                .uri(URI(counter.destination))
+                                .header("Content-Type", "application/json")
+                                .header("Content-Encoding", "gzip")
+                                .POST(HttpRequest.BodyPublishers.ofByteArray(json.gzip()))
+                                .build()
 
                             lastUploadFailed = try {
-                                val response = httpClient.execute(counterPost)
-                                assert(response.statusLine.statusCode == HttpStatus.SC_OK) {
-                                    "upload failed: ${response.statusLine}"
+                                val response = httpClient.send(counterPost, HttpResponse.BodyHandlers.ofString())
+                                check(response.statusCode() == HttpURLConnection.HTTP_OK) {
+                                    "upload failed: ${response.statusCode()}"
                                 }
                                 false
                             } catch (e: Throwable) {
@@ -343,11 +342,11 @@ class StartupActivity :
             @Suppress("MagicNumber", "SwallowedException")
             val networkAddress = try {
                 NetworkInterface.getNetworkInterfaces().toList().flatMap { networkInterface ->
-                    networkInterface.inetAddresses.toList()
+                    networkInterface.inetAddresses.asSequence()
                         .filter { it.address.size == 4 }
                         .filter { !it.isLoopbackAddress }
                         .filter { it.address[0] != 10.toByte() }
-                        .map { it.hostAddress }
+                        .map { it.hostAddress }.toList()
                 }.first()
             } catch (e: Exception) {
                 null
@@ -492,13 +491,13 @@ class StartupActivity :
         projectCounter.caretPositionChangedCount++
     }
 
-/*
-override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
-    val projectCounter = currentProjectCounters[visibleAreaEvent.editor.project] ?: return
-    log.trace("visibleAreaChanged")
-    projectCounter.visibleAreaChangedCount++
-}
-*/
+    /*
+    override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
+        val projectCounter = currentProjectCounters[visibleAreaEvent.editor.project] ?: return
+        log.trace("visibleAreaChanged")
+        projectCounter.visibleAreaChangedCount++
+    }
+     */
 
     override fun mousePressed(editorMouseEvent: EditorMouseEvent) {
         val projectCounter = currentProjectCounters[editorMouseEvent.editor.project] ?: return
@@ -631,4 +630,27 @@ override fun visibleAreaChanged(visibleAreaEvent: VisibleAreaEvent) {
             }
         runCounter.started++
     }
+}
+
+@Suppress("EmptyFunctionBlock")
+private val trustAllCerts = SSLContext.getInstance("TLS").apply {
+    init(
+        null,
+        arrayOf<TrustManager>(object : X509TrustManager {
+            override fun getAcceptedIssuers(): Array<X509Certificate>? = null
+            override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) {}
+            override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) {}
+        }),
+        SecureRandom(),
+    )
+}
+
+private fun String.gzip(): ByteArray? {
+    check(this.isNotEmpty())
+    val obj = ByteArrayOutputStream()
+    GZIPOutputStream(obj).apply {
+        write(toByteArray())
+        close()
+    }
+    return obj.toByteArray()
 }
