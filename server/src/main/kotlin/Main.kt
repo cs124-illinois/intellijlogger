@@ -122,7 +122,7 @@ fun Application.intellijlogger() {
                             currentStatus.compressedCount++
                         }
 
-                        false -> bytes.toString()
+                        false -> String(bytes)
                     }
                 }.let { string ->
                     gson.fromJson<JsonObject>(string, JsonObject::class.java)
