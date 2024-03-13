@@ -77,14 +77,15 @@ data class Status(
     var receivedCount: Int = 0,
     var compressedCount: Int = 0,
     var failureCount: Int = 0,
-    var lastUpload: Instant? = null
+    var lastUpload: Instant? = null,
 )
 
 val currentStatus = Status()
 
 val gson: Gson = GsonBuilder()
     .setPrettyPrinting()
-    .registerTypeAdapter(Instant::class.java,
+    .registerTypeAdapter(
+        Instant::class.java,
         object : JsonSerializer<Instant> {
             override fun serialize(
                 instant: Instant?,
@@ -93,7 +94,8 @@ val gson: Gson = GsonBuilder()
             ): JsonElement {
                 return JsonPrimitive(instant.toString())
             }
-        }).create()
+        },
+    ).create()
 
 fun ByteArray.decompress() = BufferedReader(InputStreamReader(GZIPInputStream(ByteArrayInputStream(this)), "UTF-8"))
     .use(BufferedReader::readText)
