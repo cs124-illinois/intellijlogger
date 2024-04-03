@@ -41,42 +41,41 @@ class ApplicationService : PersistentStateComponent<ApplicationService.State>, D
     override fun initializeComponent() {
         super.initializeComponent()
 
-        if (_state.UUID == "") {
-            _state.UUID = UUID.randomUUID().toString()
-            if (_state.savedCounters.size != 0) {
+        if (actualState.UUID == "") {
+            actualState.UUID = UUID.randomUUID().toString()
+            if (actualState.savedCounters.size != 0) {
                 log.warn("Must be updating plugin since saved counters exist before UUID is set")
             }
         }
-        for (counter in _state.savedCounters) {
-            if (counter.UUID != _state.UUID) {
-                log.warn("Altering counter with bad UUID: ${counter.UUID} != ${_state.UUID}")
-                counter.UUID = _state.UUID
+        for (counter in actualState.savedCounters) {
+            if (counter.UUID != actualState.UUID) {
+                log.warn("Altering counter with bad UUID: ${counter.UUID} != ${actualState.UUID}")
+                counter.UUID = actualState.UUID
             }
         }
-        for (counter in _state.activeCounters) {
-            if (counter.UUID != _state.UUID) {
-                log.warn("Altering counter with bad UUID: ${counter.UUID} != ${_state.UUID}")
-                counter.UUID = _state.UUID
+        for (counter in actualState.activeCounters) {
+            if (counter.UUID != actualState.UUID) {
+                log.warn("Altering counter with bad UUID: ${counter.UUID} != ${actualState.UUID}")
+                counter.UUID = actualState.UUID
             }
-            counter.end = _state.lastSave
-            synchronized(_state.savedCounters) {
-                _state.savedCounters.add(counter)
+            counter.end = actualState.lastSave
+            synchronized(actualState.savedCounters) {
+                actualState.savedCounters.add(counter)
             }
         }
-        _state.activeCounters.clear()
+        actualState.activeCounters.clear()
     }
 
-    @Suppress("PropertyName", "VariableNaming")
-    var _state = State()
+    var actualState = State()
 
     override fun getState(): State {
         log.trace("Saving state")
-        _state.lastSave = Instant.now().toEpochMilli()
-        return _state
+        actualState.lastSave = Instant.now().toEpochMilli()
+        return actualState
     }
 
     override fun loadState(state: State) {
-        _state = state
+        actualState = state
     }
 
     override fun dispose() {

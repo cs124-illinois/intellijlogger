@@ -5,13 +5,13 @@ import java.io.File
 
 val majorIntelliJVersion = "223"
 group = "edu.illinois.cs.cs125"
-version = "2024.3.0.$majorIntelliJVersion"
+version = "2024.4.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij") version "1.17.2"
+    id("org.jetbrains.intellij") version "1.17.3"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -23,7 +23,7 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild.set(majorIntelliJVersion)
-    untilBuild.set("233.*")
+    untilBuild.set("241.*")
 }
 java {
     targetCompatibility = JavaVersion.VERSION_11

@@ -102,7 +102,7 @@ class StartupActivity :
     private val applicationService
         get() = service<ApplicationService>()
     private val state
-        get() = service<ApplicationService>()._state
+        get() = service<ApplicationService>().actualState
 
     data class ProjectState(
         var currentRunConfiguration: String?,
