@@ -2,7 +2,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2024.3.0"
+version = "2024.5.0"
 
 plugins {
     kotlin("jvm")
@@ -13,19 +13,19 @@ plugins {
 }
 dependencies {
     implementation(project(":plugin"))
-    implementation("io.ktor:ktor-server-netty:2.3.9")
-    implementation("io.ktor:ktor-server-forwarded-header:2.3.9")
-    implementation("io.ktor:ktor-server-cors:2.3.9")
+    implementation("io.ktor:ktor-server-netty:2.3.11")
+    implementation("io.ktor:ktor-server-forwarded-header:2.3.11")
+    implementation("io.ktor:ktor-server-cors:2.3.11")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("io.ktor:ktor-serialization-gson:2.3.9")
-    implementation("ch.qos.logback:logback-classic:1.5.3")
+    implementation("io.ktor:ktor-serialization-gson:2.3.11")
+    implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.0")
     testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.3.9")
+    testImplementation("io.ktor:ktor-server-test-host:2.3.11")
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
