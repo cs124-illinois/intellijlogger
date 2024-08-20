@@ -1,4 +1,4 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+@file:Suppress("LoggingSimilarMessage")
 
 package edu.illinois.cs.cs125.intellijlogger
 
@@ -47,7 +47,6 @@ import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.URI
-import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -148,7 +147,7 @@ class StartupActivity :
                     }
                     @Suppress("SwallowedException")
                     try {
-                        URL("http://www.google.com").openConnection().let {
+                        URI("http://www.google.com").toURL().openConnection().let {
                             it.connect()
                             it.getInputStream().close()
                         }
@@ -177,7 +176,7 @@ class StartupActivity :
 
                             @Suppress("SwallowedException")
                             try {
-                                check(InetAddress.getAllByName(URL(counter.destination).host).isNotEmpty())
+                                check(InetAddress.getAllByName(URI(counter.destination).toURL().host).isNotEmpty())
                             } catch (err: Exception) {
                                 log.warn("Skipping destination ${counter.destination} that does not resolve")
                                 synchronized(state.savedCounters) {

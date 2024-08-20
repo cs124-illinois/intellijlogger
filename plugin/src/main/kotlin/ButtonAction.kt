@@ -25,9 +25,7 @@ fun Project.getButtonAction(): RunnerAndConfigurationSettings? {
 }
 
 class ButtonAction : AnAction() {
-    override fun getActionUpdateThread(): ActionUpdateThread {
-        return ActionUpdateThread.BGT
-    }
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun actionPerformed(anActionEvent: AnActionEvent) {
         log.trace("actionPerformed")

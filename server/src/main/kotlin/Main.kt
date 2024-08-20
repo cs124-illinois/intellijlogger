@@ -91,9 +91,7 @@ val gson: Gson = GsonBuilder()
                 instant: Instant?,
                 typeOfSrc: Type?,
                 context: JsonSerializationContext?,
-            ): JsonElement {
-                return JsonPrimitive(instant.toString())
-            }
+            ): JsonElement = JsonPrimitive(instant.toString())
         },
     ).create()
 

@@ -1,4 +1,4 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+@file:Suppress("LoggingSimilarMessage")
 
 package edu.illinois.cs.cs125.intellijlogger
 
@@ -23,8 +23,10 @@ data class ProjectConfiguration(
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2024.5.0.223.xml"))])
-class ApplicationService : PersistentStateComponent<ApplicationService.State>, Disposable {
+@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2024.8.0.223.xml"))])
+class ApplicationService :
+    PersistentStateComponent<ApplicationService.State>,
+    Disposable {
     data class State(
         var activeCounters: MutableList<Counter> = mutableListOf(),
         var savedCounters: MutableList<Counter> = mutableListOf(),

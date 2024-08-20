@@ -26,9 +26,7 @@ class Character : TypedHandlerDelegate() {
 }
 
 class Backspace : BackspaceHandlerDelegate() {
-    override fun charDeleted(c: Char, file: PsiFile, editor: Editor): Boolean {
-        return true
-    }
+    override fun charDeleted(c: Char, file: PsiFile, editor: Editor): Boolean = true
 
     override fun beforeCharDeleted(c: Char, file: PsiFile, editor: Editor) {
         countCharacter(editor.project)
@@ -44,9 +42,7 @@ class Enter : EnterHandlerDelegate {
         caretAdvance: Ref<Int>,
         dataContext: DataContext,
         originalHandler: EditorActionHandler?,
-    ): EnterHandlerDelegate.Result {
-        return EnterHandlerDelegate.Result.Continue
-    }
+    ): EnterHandlerDelegate.Result = EnterHandlerDelegate.Result.Continue
 
     override fun postProcessEnter(
         file: PsiFile,

@@ -46,30 +46,26 @@ data class Counter(
     var opened: Boolean = false,
     var closed: Boolean = true,
 ) {
-    fun totalCount(): Int {
-        return keystrokeCount +
-            caretAdded +
-            caretRemoved +
-            caretPositionChangedCount +
-            // visibleAreaChangedCount +
-            mousePressedCount +
-            mouseActivityCount +
-            documentChangedCount +
-            successfulCompileCount +
-            failedCompileCount +
-            compilerErrorCount +
-            compilerWarningCount +
-            gradingCount +
-            totalTestCount +
-            totalRunCount +
-            fileOpenedCount +
-            fileClosedCount +
-            fileSelectionChangedCount
-    }
+    fun totalCount(): Int = keystrokeCount +
+        caretAdded +
+        caretRemoved +
+        caretPositionChangedCount +
+        // visibleAreaChangedCount +
+        mousePressedCount +
+        mouseActivityCount +
+        documentChangedCount +
+        successfulCompileCount +
+        failedCompileCount +
+        compilerErrorCount +
+        compilerWarningCount +
+        gradingCount +
+        totalTestCount +
+        totalRunCount +
+        fileOpenedCount +
+        fileClosedCount +
+        fileSelectionChangedCount
 
-    fun isEmpty(): Boolean {
-        return totalCount() == 0
-    }
+    fun isEmpty(): Boolean = totalCount() == 0
 }
 
 @Serializable

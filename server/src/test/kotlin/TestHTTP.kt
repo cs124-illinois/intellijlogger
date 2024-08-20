@@ -10,14 +10,15 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 
 @Suppress("DEPRECATION")
-class TestHTTP : StringSpec({
-    "should provide info in response to GET" {
-        withTestApplication(Application::intellijlogger) {
-            handleRequest(HttpMethod.Get, "/") {
-                addHeader("content-type", "application/json")
-            }.apply {
-                response.shouldHaveStatus(HttpStatusCode.OK.value)
+class TestHTTP :
+    StringSpec({
+        "should provide info in response to GET" {
+            withTestApplication(Application::intellijlogger) {
+                handleRequest(HttpMethod.Get, "/") {
+                    addHeader("content-type", "application/json")
+                }.apply {
+                    response.shouldHaveStatus(HttpStatusCode.OK.value)
+                }
             }
         }
-    }
-})
+    })
