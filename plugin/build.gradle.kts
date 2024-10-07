@@ -2,9 +2,9 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-val majorIntelliJVersion = "223"
+val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2024.8.0.$majorIntelliJVersion"
+version = "2024.10.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -15,7 +15,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 intellij {
-    version = "2022.3.3"
+    version = "2023.1"
     pluginName = "CS 124 IntelliJ Activity Logger"
     plugins = listOf("java")
     // sandboxDirectory.set(File(projectDir, "sandbox").absolutePath)
@@ -30,8 +30,8 @@ java {
     }
 }
 dependencies {
-    implementation("org.yaml:snakeyaml:2.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("org.yaml:snakeyaml:2.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }
 task("createProperties") {
     doLast {
