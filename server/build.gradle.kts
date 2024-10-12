@@ -12,7 +12,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "2.3.12"
+    val ktorVersion = "3.0.0"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -20,15 +20,13 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("ch.qos.logback:logback-classic:1.5.8")
+    implementation("ch.qos.logback:logback-classic:1.5.10")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-ktor:4.4.3")
-
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
