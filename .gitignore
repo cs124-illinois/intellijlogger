@@ -17,3 +17,4 @@ test-output/
 .DS_Store
 /email.txt
 .env*
+.kotlin
