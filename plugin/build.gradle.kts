@@ -4,7 +4,7 @@ import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2024.10.0.$majorIntelliJVersion"
+version = "2024.11.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -22,7 +22,7 @@ intellij {
 }
 tasks.patchPluginXml {
     sinceBuild = majorIntelliJVersion
-    untilBuild = "242.*"
+    untilBuild = provider { null }
 }
 java {
     toolchain {

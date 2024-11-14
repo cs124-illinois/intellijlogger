@@ -2,7 +2,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2024.10.0"
+version = "2024.11.0"
 
 plugins {
     kotlin("jvm")
@@ -12,7 +12,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.0.0"
+    val ktorVersion = "3.0.1"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -20,7 +20,7 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("ch.qos.logback:logback-classic:1.5.11")
+    implementation("ch.qos.logback:logback-classic:1.5.12")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
