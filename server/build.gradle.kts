@@ -2,7 +2,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2024.11.0"
+version = "2025.1.0"
 
 plugins {
     kotlin("jvm")
@@ -12,7 +12,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.0.1"
+    val ktorVersion = "3.0.3"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -20,7 +20,7 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("ch.qos.logback:logback-classic:1.5.12")
+    implementation("ch.qos.logback:logback-classic:1.5.16")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
@@ -45,7 +45,7 @@ tasks.register<Exec>("dockerBuild") {
     workingDir(layout.buildDirectory.dir("docker"))
     environment("DOCKER_BUILDKIT", "1")
     commandLine(
-        ("docker build . " +
+        ("/usr/local/bin/docker build . " +
             "-t ${dockerName}:latest " +
             "-t ${dockerName}:${project.version}").split(" ")
     )
@@ -54,7 +54,7 @@ tasks.register<Exec>("dockerPush") {
     dependsOn("dockerCopyJar", "dockerCopyDockerfile")
     workingDir(layout.buildDirectory.dir("docker"))
     commandLine(
-        ("docker buildx build . --platform=linux/amd64,linux/arm64/v8 " +
+        ("/usr/local/bin/docker buildx build . --platform=linux/amd64,linux/arm64/v8 " +
             "--builder multiplatform " +
             "--tag ${dockerName}:latest " +
             "--tag ${dockerName}:${project.version} --push").split(" ")
