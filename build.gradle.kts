@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.0" apply false
-    kotlin("plugin.serialization") version "2.1.0" apply false
+    kotlin("jvm") version "2.1.10" apply false
+    kotlin("plugin.serialization") version "2.1.10" apply false
     id("org.jmailen.kotlinter") version "5.0.1" apply false
-    id("com.github.ben-manes.versions") version "0.51.0"
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("com.github.ben-manes.versions") version "0.52.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 allprojects {
     repositories {

@@ -2,7 +2,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2025.1.0"
+version = "2025.2.0"
 
 plugins {
     kotlin("jvm")
@@ -12,7 +12,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.0.3"
+    val ktorVersion = "3.1.0"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -55,7 +55,6 @@ tasks.register<Exec>("dockerPush") {
     workingDir(layout.buildDirectory.dir("docker"))
     commandLine(
         ("/usr/local/bin/docker buildx build . --platform=linux/amd64,linux/arm64/v8 " +
-            "--builder multiplatform " +
             "--tag ${dockerName}:latest " +
             "--tag ${dockerName}:${project.version} --push").split(" ")
     )
