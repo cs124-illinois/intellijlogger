@@ -123,7 +123,7 @@ class StartupActivity :
             return
         }
 
-        if (state.savedCounters.size == 0) {
+        if (state.savedCounters.isEmpty()) {
             log.trace("No counters to upload")
             return
         }
@@ -151,14 +151,14 @@ class StartupActivity :
                             it.connect()
                             it.getInputStream().close()
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         log.warn("No connection")
                         return
                     }
                     val now = Instant.now().toEpochMilli()
                     uploadBusy = true
 
-                    @Suppress("LoopWithTooManyJumpStatements")
+                    @Suppress("LoopWithTooManyJumpStatements", "UNUSED")
                     for (index in 0..currentCount) {
                         if (state.savedCounters.isEmpty()) {
                             break
@@ -177,7 +177,7 @@ class StartupActivity :
                             @Suppress("SwallowedException")
                             try {
                                 check(InetAddress.getAllByName(URI(counter.destination).toURL().host).isNotEmpty())
-                            } catch (err: Exception) {
+                            } catch (_: Exception) {
                                 log.warn("Skipping destination ${counter.destination} that does not resolve")
                                 synchronized(state.savedCounters) {
                                     try {
@@ -300,7 +300,7 @@ class StartupActivity :
         } else if (now - lastSuccessfulUpload > SHORTEST_UPLOAD_INTERVAL) {
             log.trace("Upload interval exceeded")
             uploadCounters()
-        } else if (emptyIntervals > EMPTY_LOG_COUNT_THRESHOLD && state.savedCounters.size > 0) {
+        } else if (emptyIntervals > EMPTY_LOG_COUNT_THRESHOLD && state.savedCounters.isNotEmpty()) {
             log.trace("Quiescent interval exceeded")
             uploadCounters()
         }
@@ -347,28 +347,28 @@ class StartupActivity :
                         .filter { it.address[0] != 10.toByte() }
                         .map { it.hostAddress }.toList()
                 }.first()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
 
             @Suppress("SwallowedException")
             val buttonAction = try {
                 configuration["buttonAction"]
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
 
             @Suppress("SwallowedException")
             val trustSelfSignedCertificates = try {
                 configuration["trustSelfSignedCertificates"].toBoolean()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
 
             @Suppress("SwallowedException")
             val uploadOnClose = try {
                 configuration["uploadOnClose"].toBoolean()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
             ProjectConfiguration(
@@ -550,7 +550,7 @@ class StartupActivity :
                     info.email = documentEvent.document.text.trim()
                     log.debug("Updated email for project " + info.name + ": " + info.email)
                 }
-            } catch (e: Throwable) {
+            } catch (_: Throwable) {
                 // Ignore errors here so that we can proceed
             }
         }

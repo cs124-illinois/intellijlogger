@@ -1,10 +1,12 @@
+@file:Suppress("SpellCheckingInspection")
+
 import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2025.2.0.$majorIntelliJVersion"
+version = "2025.6.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -31,9 +33,9 @@ java {
 }
 dependencies {
     implementation("org.yaml:snakeyaml:2.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 }
-task("createProperties") {
+tasks.register("createProperties") {
     doLast {
         val properties = Properties().also { it["version"] = project.version.toString() }
         File(projectDir, "src/main/resources/edu.illinois.cs.cs125.intellijlogger.version")

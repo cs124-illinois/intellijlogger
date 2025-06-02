@@ -23,7 +23,7 @@ data class ProjectConfiguration(
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2025.2.0.223.xml"))])
+@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2025.6.0.223.xml"))])
 class ApplicationService :
     PersistentStateComponent<ApplicationService.State>,
     Disposable {
@@ -45,7 +45,7 @@ class ApplicationService :
 
         if (actualState.UUID == "") {
             actualState.UUID = UUID.randomUUID().toString()
-            if (actualState.savedCounters.size != 0) {
+            if (actualState.savedCounters.isNotEmpty()) {
                 log.warn("Must be updating plugin since saved counters exist before UUID is set")
             }
         }

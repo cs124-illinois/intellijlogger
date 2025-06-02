@@ -1,8 +1,10 @@
+@file:Suppress("SpellCheckingInspection")
+
 import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2025.2.0"
+version = "2025.6.0"
 
 plugins {
     kotlin("jvm")
@@ -12,7 +14,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.1.0"
+    val ktorVersion = "3.1.3"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -20,7 +22,7 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("ch.qos.logback:logback-classic:1.5.16")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
@@ -64,7 +66,7 @@ tasks.test {
     systemProperties["logback.configurationFile"] = File(projectDir, "src/test/resources/logback.xml").absolutePath
     environment("MONGODB", "mongodb://localhost:27017/testing")
 }
-task("createProperties") {
+tasks.register("createProperties") {
     doLast {
         val properties = Properties().also {
             it["version"] = project.version.toString()
