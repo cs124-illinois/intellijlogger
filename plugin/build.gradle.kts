@@ -6,7 +6,7 @@ import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2025.6.0.$majorIntelliJVersion"
+version = "2025.7.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -33,7 +33,7 @@ java {
 }
 dependencies {
     implementation("org.yaml:snakeyaml:2.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 }
 tasks.register("createProperties") {
     doLast {

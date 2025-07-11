@@ -4,7 +4,7 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2025.6.0"
+version = "2025.7.0"
 
 plugins {
     kotlin("jvm")
@@ -14,7 +14,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.1.3"
+    val ktorVersion = "3.2.1"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
