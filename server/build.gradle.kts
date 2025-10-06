@@ -9,7 +9,7 @@ version = "2025.10.0"
 plugins {
     kotlin("jvm")
     application
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "9.2.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
