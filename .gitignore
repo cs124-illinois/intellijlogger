@@ -18,3 +18,4 @@ test-output/
 /email.txt
 .env*
 .kotlin
+.intellijPlatform/
