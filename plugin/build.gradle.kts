@@ -6,25 +6,29 @@ import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2025.7.0.$majorIntelliJVersion"
+version = "2025.10.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij") version "1.17.4"
+    id("org.jetbrains.intellij.platform") version "2.9.0"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
-intellij {
-    version = "2023.1"
-    pluginName = "CS 124 IntelliJ Activity Logger"
-    plugins = listOf("java")
-    // sandboxDirectory.set(File(projectDir, "sandbox").absolutePath)
+repositories {
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
-tasks.patchPluginXml {
-    sinceBuild = majorIntelliJVersion
-    untilBuild = provider { null }
+intellijPlatform {
+    pluginConfiguration {
+        name = "CS 124 IntelliJ Activity Logger"
+        ideaVersion {
+            sinceBuild = majorIntelliJVersion
+            untilBuild = provider { null }
+        }
+    }
 }
 java {
     toolchain {
@@ -32,7 +36,12 @@ java {
     }
 }
 dependencies {
-    implementation("org.yaml:snakeyaml:2.4")
+    intellijPlatform {
+        @Suppress("DEPRECATION")
+        intellijIdeaCommunity("2023.1")
+        bundledPlugin("com.intellij.java")
+    }
+    implementation("org.yaml:snakeyaml:2.5")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 }
 tasks.register("createProperties") {
