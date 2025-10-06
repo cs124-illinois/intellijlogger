@@ -23,7 +23,7 @@ data class ProjectConfiguration(
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2025.7.0.223.xml"))])
+@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2025.10.0.223.xml"))])
 class ApplicationService :
     PersistentStateComponent<ApplicationService.State>,
     Disposable {
