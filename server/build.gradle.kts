@@ -9,12 +9,12 @@ version = "2025.10.0"
 plugins {
     kotlin("jvm")
     application
-    id("com.gradleup.shadow") version "9.2.0"
+    id("com.gradleup.shadow") version "9.2.2"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.3.0"
+    val ktorVersion = "3.3.1"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -28,7 +28,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("io.kotest:kotest-runner-junit5:6.0.3")
+    testImplementation("io.kotest:kotest-runner-junit5:6.0.4")
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
