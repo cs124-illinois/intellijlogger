@@ -6,7 +6,7 @@ import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2025.10.0.$majorIntelliJVersion"
+version = "2025.10.1.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
@@ -23,7 +23,7 @@ repositories {
 }
 intellijPlatform {
     pluginConfiguration {
-        name = "CS 124 IntelliJ Activity Logger"
+        name = "CS 124 Activity Logger"
         ideaVersion {
             sinceBuild = majorIntelliJVersion
             untilBuild = provider { null }
