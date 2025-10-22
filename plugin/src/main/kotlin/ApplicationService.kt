@@ -8,6 +8,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.eclipse.jgit.lib.Repository
 import java.time.Instant
 import java.util.UUID
 
@@ -20,10 +21,11 @@ data class ProjectConfiguration(
     val buttonAction: String?,
     val trustSelfSignedCertificates: Boolean,
     val uploadOnClose: Boolean,
+    var gitRepository: Repository?,
 )
 
 @Suppress("unused")
-@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2025.10.0.231.xml"))])
+@State(name = "Component", storages = [(Storage("edu.illinois.cs.cs125.intellijlogger.2025.10.2.231.xml"))])
 class ApplicationService :
     PersistentStateComponent<ApplicationService.State>,
     Disposable {

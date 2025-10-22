@@ -3,6 +3,15 @@ package edu.illinois.cs.cs125.intellijlogger
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
+@Serializable
+data class GitInfo(
+    val commit: String? = null,
+    val branch: String? = null,
+    val remotes: Map<String, String> = mapOf(),
+    val userName: String? = null,
+    val userEmail: String? = null,
+)
+
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @Serializable
 data class Counter(
@@ -45,6 +54,7 @@ data class Counter(
     var selectedFile: String = "",
     var opened: Boolean = false,
     var closed: Boolean = true,
+    var gitInfo: GitInfo? = null,
 ) {
     fun totalCount(): Int = keystrokeCount +
         caretAdded +
@@ -65,7 +75,11 @@ data class Counter(
         fileClosedCount +
         fileSelectionChangedCount
 
-    fun isEmpty(): Boolean = totalCount() == 0
+    fun isEmpty(previousGitInfo: GitInfo? = null): Boolean {
+        val hasActivity = totalCount() > 0
+        val gitChanged = gitInfo?.commit != previousGitInfo?.commit
+        return !hasActivity && !gitChanged
+    }
 }
 
 @Serializable

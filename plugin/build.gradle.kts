@@ -6,13 +6,13 @@ import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2025.10.1.$majorIntelliJVersion"
+version = "2025.10.2.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij.platform") version "2.10.0"
+    id("org.jetbrains.intellij.platform") version "2.10.1"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -43,6 +43,7 @@ dependencies {
     }
     implementation("org.yaml:snakeyaml:2.5")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.4.0.202509020913-r")
 }
 tasks.register("createProperties") {
     doLast {

@@ -40,6 +40,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.yaml.snakeyaml.Yaml
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -77,6 +80,41 @@ private const val SHORTEST_UPLOAD_WAIT = 5 * 60 * 1000 // 5 minutes
 private const val SHORTEST_UPLOAD_INTERVAL = 10 * 60 * 1000 // 10 minutes
 private const val SECONDS_TO_MILLISECONDS = 1000L
 
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+private fun collectGitInfo(repository: Repository?): GitInfo? {
+    if (repository == null) return null
+
+    @Suppress("SwallowedException")
+    fun <T> safely(block: () -> T?): T? = try {
+        block()
+    } catch (_: Exception) {
+        null
+    }
+
+    return try {
+        val commit = safely { repository.resolve(Constants.HEAD)?.name }
+        val branch = safely { repository.branch }
+
+        val remotes = safely {
+            val remotesMap = mutableMapOf<String, String>()
+            repository.config.getSubsections("remote").forEach { remoteName ->
+                repository.config.getString("remote", remoteName, "url")?.let {
+                    remotesMap[remoteName] = it
+                }
+            }
+            remotesMap
+        } ?: mapOf()
+
+        val userName = safely { repository.config.getString("user", null, "name") }
+        val userEmail = safely { repository.config.getString("user", null, "email") }
+
+        GitInfo(commit, branch, remotes, userName, userEmail)
+    } catch (e: Exception) {
+        log.warn("Error collecting Git info: $e")
+        null
+    }
+}
+
 @ExperimentalSerializationApi
 @Suppress("TooManyFunctions")
 class StartupActivity :
@@ -105,6 +143,7 @@ class StartupActivity :
 
     data class ProjectState(
         var currentRunConfiguration: String?,
+        var lastGitInfo: GitInfo?,
     )
 
     private val projectStates = mutableMapOf<Project, ProjectState>()
@@ -237,14 +276,31 @@ class StartupActivity :
 
         val end = Instant.now().toEpochMilli()
 
-        if (currentProjectCounters.values.none { !it.isEmpty() }) {
+        // Collect current Git info for all projects
+        val currentGitInfos = mutableMapOf<Project, GitInfo?>()
+        for ((project, _) in currentProjectCounters) {
+            val projectConfiguration = projectConfigurations[project]
+            val gitInfo = collectGitInfo(projectConfiguration?.gitRepository)
+            currentGitInfos[project] = gitInfo
+        }
+
+        // Check if any counter is non-empty (including Git changes)
+        val hasNonEmptyCounters = currentProjectCounters.any { (project, counter) ->
+            val previousGitInfo = projectStates[project]?.lastGitInfo
+            !counter.isEmpty(previousGitInfo)
+        }
+
+        if (!hasNonEmptyCounters) {
             log.trace("$emptyIntervals empty intervals")
             emptyIntervals++
         } else {
             emptyIntervals = 0
             @Suppress("LoopWithTooManyJumpStatements")
             for ((project, counter) in currentProjectCounters) {
-                if (counter.isEmpty()) {
+                val projectState = projectStates[project]
+                val previousGitInfo = projectState?.lastGitInfo
+
+                if (counter.isEmpty(previousGitInfo)) {
                     continue
                 }
                 val projectConfiguration = projectConfigurations[project]
@@ -252,6 +308,9 @@ class StartupActivity :
                     log.warn("Missing project configuration in rotate")
                     continue
                 }
+
+                // Update counter with current Git info
+                counter.gitInfo = currentGitInfos[project]
                 counter.end = end
 
                 val fileDocumentManager = FileDocumentManager.getInstance()
@@ -271,6 +330,7 @@ class StartupActivity :
                 }
                 state.activeCounters.remove(counter)
 
+                val currentGitInfo = currentGitInfos[project]
                 val newCounter = Counter(
                     projectConfiguration.destination,
                     projectConfiguration.trustSelfSignedCertificates,
@@ -283,9 +343,13 @@ class StartupActivity :
                     version,
                     intellijVersion,
                 )
+                newCounter.gitInfo = currentGitInfo
                 currentProjectCounters[project] = newCounter
 
                 state.activeCounters.add(newCounter)
+
+                // Update project state with current Git info
+                projectState?.lastGitInfo = currentGitInfo
             }
         }
 
@@ -371,6 +435,23 @@ class StartupActivity :
             } catch (_: Exception) {
                 false
             }
+
+            @Suppress("SwallowedException")
+            val gitRepository = try {
+                val basePath = project.basePath?.let { File(it) }
+                if (basePath != null) {
+                    FileRepositoryBuilder()
+                        .setMustExist(true)
+                        .findGitDir(basePath)
+                        .build()
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                log.trace("No Git repository found: $e")
+                null
+            }
+
             ProjectConfiguration(
                 destination,
                 name,
@@ -380,6 +461,7 @@ class StartupActivity :
                 buttonAction,
                 trustSelfSignedCertificates,
                 uploadOnClose,
+                gitRepository,
             )
         } catch (e: Exception) {
             log.debug("Can't load project configuration: $e")
@@ -388,6 +470,8 @@ class StartupActivity :
 
         log.trace(projectConfiguration.toString())
         projectConfigurations[project] = projectConfiguration
+
+        val initialGitInfo = collectGitInfo(projectConfiguration.gitRepository)
 
         val newCounter = Counter(
             projectConfiguration.destination,
@@ -402,6 +486,7 @@ class StartupActivity :
             intellijVersion,
         )
         newCounter.opened = true
+        newCounter.gitInfo = initialGitInfo
         currentProjectCounters[project] = newCounter
         state.activeCounters.add(newCounter)
 
@@ -430,7 +515,10 @@ class StartupActivity :
         project.messageBus.connect().subscribe(RunManagerListener.TOPIC, this)
         project.messageBus.connect().subscribe(ExecutionManager.EXECUTION_TOPIC, this)
 
-        projectStates[project] = ProjectState(RunManager.getInstance(project).selectedConfiguration?.name)
+        projectStates[project] = ProjectState(
+            RunManager.getInstance(project).selectedConfiguration?.name,
+            initialGitInfo,
+        )
 
         Disposer.register(project.getService(ProjectService::class.java)) {
             projectClosing(project)
