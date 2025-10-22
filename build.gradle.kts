@@ -39,8 +39,12 @@ tasks.dependencyUpdates {
 detekt {
     config.from(files("config/detekt/detekt.yml"))
 }
-tasks.withType<Detekt>().configureEach {
-    dependsOn("formatKotlin")
+allprojects {
+    tasks.withType<Detekt>().configureEach {
+        tasks.findByName("formatKotlin")?.let { formatTask ->
+            dependsOn(formatTask)
+        }
+    }
 }
 tasks.register("check") {
     dependsOn("detekt")
