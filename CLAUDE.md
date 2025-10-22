@@ -110,5 +110,10 @@ The server can be containerized using the provided Dockerfile and docker-compose
 - **Plugin**: IntelliJ plugin configuration in `plugin/src/main/resources/META-INF/plugin.xml`
 - **Server**: Environment-based configuration using Konf library
 
+## Dependency Updates
+- **IMPORTANT**: To update dependencies, use `./gradlew dependencyUpdates` to check for available updates
+- Never manually search for dependency versions - the dependencyUpdates task handles this automatically
+- After running dependencyUpdates, review the report and update versions in build.gradle.kts files accordingly
+
 ## Gradle Check Task
 - Use the Gradle check task to validate changes in this repository.
