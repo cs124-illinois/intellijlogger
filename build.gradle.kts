@@ -1,5 +1,6 @@
 @file:Suppress("SpellCheckingInspection")
 
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -37,6 +38,9 @@ tasks.dependencyUpdates {
 }
 detekt {
     config.from(files("config/detekt/detekt.yml"))
+}
+tasks.withType<Detekt>().configureEach {
+    dependsOn("formatKotlin")
 }
 tasks.register("check") {
     dependsOn("detekt")

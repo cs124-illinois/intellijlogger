@@ -16,9 +16,10 @@ fun Project.getButtonAction(): RunnerAndConfigurationSettings? {
         return null
     }
     val regex = Regex(pattern)
-    return RunManager.getInstance(this).allSettings.find { runConfiguration ->
-        runConfiguration.name.trim().matches(regex)
-    } ?: run {
+    return RunManager.getInstance(this).allSettings
+        .filter { runConfiguration -> runConfiguration.name.trim().matches(regex) }
+        .sortedBy { it.name }
+        .lastOrNull() ?: run {
         log.trace("no run configuration matched $pattern")
         return null
     }
