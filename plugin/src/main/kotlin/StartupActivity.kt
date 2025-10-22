@@ -376,7 +376,13 @@ class StartupActivity :
     override fun runActivity(project: Project) {
         log.info("projectOpened")
 
-        val configurationFile = File(project.basePath.toString()).resolve(File(".intellijlogger.yaml"))
+        val basePath = project.basePath
+        if (basePath == null) {
+            log.warn("Project basePath is null, cannot load configuration")
+            return
+        }
+
+        val configurationFile = File(basePath).resolve(".intellijlogger.yaml")
         if (!configurationFile.exists()) {
             log.trace("no project configuration found")
             return

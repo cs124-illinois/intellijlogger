@@ -25,6 +25,7 @@
                 description="Initiate CS 124 MP grading"
                 icon="/icons/cs124.png">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
+            <add-to-group group-id="RunToolbarMainActionGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl G"/>
         </action>
     </actions>
