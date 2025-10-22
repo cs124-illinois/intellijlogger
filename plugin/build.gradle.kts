@@ -43,7 +43,9 @@ dependencies {
     }
     implementation("org.yaml:snakeyaml:2.5")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    implementation("org.eclipse.jgit:org.eclipse.jgit:7.4.0.202509020913-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.4.0.202509020913-r") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
 }
 tasks.register("createProperties") {
     doLast {
