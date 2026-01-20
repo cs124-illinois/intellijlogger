@@ -7,8 +7,9 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
-import com.mongodb.MongoClient
-import com.mongodb.MongoClientURI
+import com.mongodb.ConnectionString
+import com.mongodb.MongoClientSettings
+import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
@@ -61,10 +62,13 @@ val configuration = Config {
 }.from.env()
 
 val mongoCollection: MongoCollection<BsonDocument> = configuration[TopLevel.mongodb].run {
-    val uri = MongoClientURI(this)
-    val database = uri.database ?: error("MONGO must specify database to use")
+    val connString = ConnectionString(this)
+    val settings = MongoClientSettings.builder()
+        .applyConnectionString(connString)
+        .build()
+    val database = connString.database ?: error("MONGODB must specify database to use")
     val collection = configuration[TopLevel.mongoCollection]
-    MongoClient(uri).getDatabase(database).getCollection(collection, BsonDocument::class.java)
+    MongoClients.create(settings).getDatabase(database).getCollection(collection, BsonDocument::class.java)
 }
 
 @Suppress("unused")

@@ -6,13 +6,13 @@ import java.io.File
 
 val majorIntelliJVersion = "231"
 group = "edu.illinois.cs.cs125"
-version = "2025.10.2.$majorIntelliJVersion"
+version = "2026.1.0.$majorIntelliJVersion"
 
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     idea
-    id("org.jetbrains.intellij.platform") version "2.10.1"
+    id("org.jetbrains.intellij.platform") version "2.10.5"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -43,7 +43,7 @@ dependencies {
     }
     implementation("org.yaml:snakeyaml:2.5")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    implementation("org.eclipse.jgit:org.eclipse.jgit:7.4.0.202509020913-r") {
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.5.0.202512021534-r") {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
 }

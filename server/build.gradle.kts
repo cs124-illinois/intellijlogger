@@ -4,31 +4,31 @@ import java.util.Properties
 import java.io.StringWriter
 import java.io.File
 
-version = "2025.10.2"
+version = "2026.1.0"
 
 plugins {
     kotlin("jvm")
     application
-    id("com.gradleup.shadow") version "9.2.2"
+    id("com.gradleup.shadow") version "9.3.1"
     id("org.jmailen.kotlinter")
     id("io.gitlab.arturbosch.detekt")
 }
 dependencies {
-    val ktorVersion = "3.3.1"
+    val ktorVersion = "3.3.3"
 
     implementation(project(":plugin"))
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-forwarded-header:$ktorVersion")
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
-    implementation("org.mongodb:mongodb-driver:3.12.14")
-    implementation("ch.qos.logback:logback-classic:1.5.20")
+    implementation("org.mongodb:mongodb-driver-sync:5.6.2")
+    implementation("ch.qos.logback:logback-classic:1.5.25")
     implementation("com.uchuhimo:konf-core:1.1.2")
     implementation("com.uchuhimo:konf-yaml:1.1.2")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("io.kotest:kotest-runner-junit5:6.0.4")
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.0")
 }
 application {
     mainClass.set("edu.illinois.cs.cs125.intellijlogger.server.MainKt")
